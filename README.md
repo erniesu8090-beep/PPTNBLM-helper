@@ -67,7 +67,7 @@ flowchart TD
    cd NBLM-Slide-Console
    ```
 2. **開啟工具**：
-   直接雙擊開啟 `index.html` 或 `prompt_helper.html` 即可在瀏覽器中使用！
+   直接雙擊開啟 `index.html` 即可在瀏覽器中使用！
 
 ---
 
@@ -98,9 +98,11 @@ B: 只要記住『先存再刷』的原則，就能輕鬆踏出第一步。
 ```text
 .
 ├── index.html                  # 主控台主要網頁 GUI
-├── prompt_helper.html          # 主控台備用/同步網頁 GUI
 ├── app.js                      # YAML 切割演算法與提示詞生成引擎 (Vanilla JS)
 ├── style.css                   # 現代深色玻璃擬物 UI 設計系統 (Vanilla CSS)
+├── favicon.ico                 # 專案圖示檔 (多尺寸 16~256px ICO)
+├── icon.ico                    # 備用圖示檔 (ICO)
+├── nblm_ppt_helper_icon.png    # 高畫質 3D 圖案原始 PNG (512x512)
 ├── 雙人對話腳本格式指南.md      # 雙人對講腳本自動匯入與配音規範文件
 └── README.md                   # 專案介紹說明文件
 ```

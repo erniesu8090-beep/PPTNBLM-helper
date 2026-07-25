@@ -509,7 +509,7 @@ function init() {
     if (narrativeStructureSelect) narrativeStructureSelect.value = preset.structure;
     if (narrativeDirectivesInput) narrativeDirectivesInput.value = preset.directives;
 
-    ["technical", "science", "business", "law", "wisdom", "dialogue-finance", "dialogue-tech", "dialogue-wisdom"].forEach(k => {
+    Object.keys(NARRATIVE_PRESETS).forEach(k => {
       const btn = document.getElementById(`narrative-preset-${k}`);
       if (btn) {
         if (k === key) {
@@ -523,7 +523,7 @@ function init() {
     updateNarrativePrompt();
   }
 
-  ["technical", "science", "business", "law", "wisdom", "dialogue-finance", "dialogue-tech", "dialogue-wisdom"].forEach(key => {
+  Object.keys(NARRATIVE_PRESETS).forEach(key => {
     const btn = document.getElementById(`narrative-preset-${key}`);
     if (btn) {
       btn.addEventListener("click", () => loadNarrativePreset(key));
