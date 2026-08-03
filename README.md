@@ -101,8 +101,6 @@ flowchart TD
 ├── icon.ico                    # 備用圖示檔 (ICO)
 ├── nblm_ppt_helper_icon.png    # 高畫質 3D 圖案原始 PNG (512x512)
 ├── images/                     # 實體 AI 生圖範本縮圖
-├── notebooklm_mascot_guide.md  # 吉祥物/視覺主角人設貫穿指南與配方庫
-├── 雙人對話腳本格式指南.md      # 雙人對講腳本自動匯入與配音規範文件
 └── README.md                   # 專案介紹說明文件
 ```
 
