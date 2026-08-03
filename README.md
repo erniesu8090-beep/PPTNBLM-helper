@@ -97,8 +97,7 @@ flowchart TD
 ├── index.html                  # 透明跳轉入口網頁 (自動跳轉至 nblm_ppt_helper.html)
 ├── app.js                      # 全域設計 DNA、雙主角構圖與 YAML 切割演算法 (Vanilla JS)
 ├── style.css                   # 現代深色玻璃擬物 UI 設計系統 (Vanilla CSS)
-├── favicon.ico                 # 專案圖示檔 (多尺寸 16~256px ICO)
-├── icon.ico                    # 備用圖示檔 (ICO)
+├── favicon.ico                 # 專案網頁圖示檔 (多尺寸 16~256px ICO)
 ├── nblm_ppt_helper_icon.png    # 高畫質 3D 圖案原始 PNG (512x512)
 ├── images/                     # 實體 AI 生圖範本縮圖
 └── README.md                   # 專案介紹說明文件
