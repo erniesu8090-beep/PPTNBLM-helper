@@ -760,16 +760,16 @@ function updateNarrativePrompt() {
 
 const MASCOT_PRESETS = {
   male_engineer: {
-    name: "男性工安工程師",
-    roleText: "使用來源中定義的男性 Q版工程師角色作為全簡報視覺主角",
-    promptSnippet: "a cute chibi male engineer wearing a safety helmet",
-    prompt: "A cute chibi male engineer character design, wearing a safety helmet, professional work clothes, and safety shoes. 2.5D illustration style, 3D isometric, exquisite material details, soft lighting, clean solid white background, full body composition, high quality, masterpiece, 8k resolution."
+    name: "男性工安工程師 (CPC 安全帽)",
+    roleText: "使用來源中定義的男性 Q版工程師角色（戴有 CPC 標誌黃色安全帽）作為全簡報視覺主角",
+    promptSnippet: "a cute chibi male engineer wearing a yellow safety helmet with CPC logo",
+    prompt: "A cute chibi male engineer character design, wearing a yellow safety helmet with CPC logo, professional work clothes, and safety shoes. 2.5D illustration style, 3D isometric, exquisite material details, soft lighting, clean solid white background, full body composition, high quality, masterpiece, 8k resolution."
   },
   female_engineer: {
-    name: "女性工安工程師",
-    roleText: "使用來源中定義的女性 Q版工程師角色作為全簡報視覺主角",
-    promptSnippet: "a cute chibi female engineer wearing a safety helmet",
-    prompt: "A cute chibi female engineer character design, wearing a safety helmet, professional work clothes, and safety shoes. 2.5D illustration style, 3D isometric, exquisite material details, soft lighting, clean solid white background, full body composition, high quality, masterpiece, 8k resolution."
+    name: "女性工安工程師 (CPC 安全帽)",
+    roleText: "使用來源中定義的女性 Q版工程師角色（戴有 CPC 標誌黃色安全帽）作為全簡報視覺主角",
+    promptSnippet: "a cute chibi female engineer wearing a yellow safety helmet with CPC logo",
+    prompt: "A cute chibi female engineer character design, wearing a yellow safety helmet with CPC logo, professional work clothes, and safety shoes. 2.5D illustration style, 3D isometric, exquisite material details, soft lighting, clean solid white background, full body composition, high quality, masterpiece, 8k resolution."
   },
   male_manager: {
     name: "男性商業顧問/PM",
