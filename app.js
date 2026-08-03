@@ -762,36 +762,43 @@ const MASCOT_PRESETS = {
   male_engineer: {
     name: "男性工安工程師",
     roleText: "使用來源中定義的男性 Q版工程師角色作為全簡報視覺主角",
+    promptSnippet: "a cute chibi male engineer wearing a safety helmet",
     prompt: "A cute chibi male engineer character design, wearing a safety helmet, professional work clothes, and safety shoes. 2.5D illustration style, 3D isometric, exquisite material details, soft lighting, clean solid white background, full body composition, high quality, masterpiece, 8k resolution."
   },
   female_engineer: {
     name: "女性工安工程師",
     roleText: "使用來源中定義的女性 Q版工程師角色作為全簡報視覺主角",
+    promptSnippet: "a cute chibi female engineer wearing a safety helmet",
     prompt: "A cute chibi female engineer character design, wearing a safety helmet, professional work clothes, and safety shoes. 2.5D illustration style, 3D isometric, exquisite material details, soft lighting, clean solid white background, full body composition, high quality, masterpiece, 8k resolution."
   },
   male_manager: {
     name: "男性商業顧問/PM",
     roleText: "使用來源中定義的男性 Q版商業顧問角色作為全簡報視覺主角",
+    promptSnippet: "a cute chibi male business manager wearing a suit",
     prompt: "A cute chibi male business manager character design, wearing a smart dark suit, neat hair, holding a tablet computer. 2.5D illustration style, 3D isometric, clean solid white background, full body, soft studio lighting, high quality, masterpiece, 8k resolution."
   },
   female_manager: {
     name: "女性商業顧問/PM",
     roleText: "使用來源中定義的女性 Q版商業顧問角色作為全簡報視覺主角",
+    promptSnippet: "a cute chibi female business manager wearing a suit blazer",
     prompt: "A cute chibi female business manager character design, wearing a stylish suit blazer, professional look, holding a tablet computer. 2.5D illustration style, 3D isometric, clean solid white background, full body, soft studio lighting, high quality, masterpiece, 8k resolution."
   },
   male_teacher: {
     name: "男性科普講師",
     roleText: "使用來源中定義的男性 Q版科普講師角色作為全簡報視覺主角",
+    promptSnippet: "a cute chibi male teacher wearing glasses and vest",
     prompt: "A cute chibi male teacher character design, wearing glasses, a smart casual vest and shirt, holding a pointer stick, friendly expression. 2.5D illustration style, 3D isometric, clean solid white background, full body, soft lighting, 8k resolution."
   },
   female_teacher: {
     name: "女性科普講師",
     roleText: "使用來源中定義的女性 Q版科普講師角色作為全簡報視覺主角",
+    promptSnippet: "a cute chibi female teacher wearing glasses and blazer",
     prompt: "A cute chibi female teacher character design, wearing glasses, a smart casual blazer, holding a pointer stick, warm friendly expression. 2.5D illustration style, 3D isometric, clean solid white background, full body, soft lighting, 8k resolution."
   },
   neutral_robot: {
     name: "可愛 AI 機器人夥伴",
     roleText: "使用來源中定義的可愛 AI 浮空機器人夥伴作為全簡報視覺主角",
+    promptSnippet: "a cute floating friendly AI robot mascot",
     prompt: "A cute floating friendly AI robot mascot character design, futuristic sleek metallic white and cyan finish, glowing blue eyes, friendly expression. 3D isometric, clean solid white background, full body, soft studio lighting, masterpiece, 8k resolution."
   }
 };
@@ -1035,13 +1042,13 @@ function initMascotFeature() {
         const keyB = MASCOT_ROLE_MAP[roleB_Title] || "female_manager";
         const mascotA = MASCOT_PRESETS[keyA];
         const mascotB = MASCOT_PRESETS[keyB];
-        textToCopy = `Dual character design: ${mascotA.promptSnippet} and ${mascotB.promptSnippet}, standing side-by-side discussing charts, ${styleDetails.snippet}`;
+        textToCopy = `Dual character design: ${mascotA.promptSnippet} and ${mascotB.promptSnippet}, standing side-by-side discussing presentation charts, ${styleDetails.snippet}`;
       } else {
         const roleVal = tab1MascotRole ? tab1MascotRole.value : "男性 Q版工程師";
         const mascotKey = MASCOT_ROLE_MAP[roleVal] || "male_engineer";
         const mascotDetails = MASCOT_PRESETS[mascotKey];
         if (mascotDetails && styleDetails) {
-          textToCopy = `${mascotDetails.basePrompt}, ${styleDetails.snippet}`;
+          textToCopy = mascotDetails.prompt;
         }
       }
 
