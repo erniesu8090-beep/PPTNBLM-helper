@@ -2,10 +2,565 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0; url=nblm_ppt_helper.html">
-  <title>NBLM 簡報輔助工具 Console</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAST. Studio | NotebookLM 簡報與口白提示詞主控台</title>
+  <!-- Favicon Icon -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <p>正在載入 NBLM 簡報輔助工具主主控台... 若未自動跳轉，請<a href="nblm_ppt_helper.html">點擊此處</a>。</p>
+  <div class="stars-bg"></div>
+  <div class="container">
+    
+    <!-- HEADER -->
+    <header class="header theme-ppt">
+      <div class="logo-area">
+        <div class="logo-icon-wrapper">
+          <svg class="logo-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="logo-border-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#ff9f43" />
+                <stop offset="35%" stop-color="#a55eea" />
+                <stop offset="70%" stop-color="#f0932b" />
+                <stop offset="100%" stop-color="#00d2d3" />
+              </linearGradient>
+              <filter id="logo-glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="1.8" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+            <rect x="2" y="2" width="28" height="28" rx="8" stroke="url(#logo-border-grad)" stroke-width="1.5" fill="rgba(11, 15, 20, 0.6)" />
+            <line x1="9" y1="8" x2="9" y2="24" stroke="rgba(255, 255, 255, 0.12)" stroke-width="2" stroke-linecap="round" />
+            <line x1="16" y1="8" x2="16" y2="24" stroke="rgba(255, 255, 255, 0.12)" stroke-width="2" stroke-linecap="round" />
+            <line x1="23" y1="8" x2="23" y2="24" stroke="rgba(255, 255, 255, 0.12)" stroke-width="2" stroke-linecap="round" />
+            <rect x="7" y="10" width="4" height="6" rx="1.5" fill="#00d2d3" filter="url(#logo-glow)" />
+            <rect x="14" y="17" width="4" height="6" rx="1.5" fill="#ff9f43" filter="url(#logo-glow)" />
+            <rect x="21" y="12" width="4" height="6" rx="1.5" fill="#a55eea" filter="url(#logo-glow)" />
+            <circle cx="27" cy="5" r="1.5" fill="#f0932b" />
+          </svg>
+        </div>
+        <div class="logo-text">
+          <h1>CAST. <span>Studio</span><span class="logo-badge">NotebookLM</span></h1>
+          <p>SLIDE & NARRATIVE PROMPT CONSOLE</p>
+        </div>
+      </div>
+      <div class="header-tagline">
+        <h2 id="header-title">突破簡報 15 頁的生成限制</h2>
+        <p id="header-desc">自動分組規劃與首尾銜接，無損合併完美長簡報</p>
+      </div>
+      <div class="status-badge">
+        <span class="status-dot"></span>
+        <span>SLIDE EDITION v3.0.0 (2026/08/03)</span>
+      </div>
+    </header>
+
+    <!-- TAB NAVIGATION -->
+    <nav class="tab-navigation">
+      <div class="tab-group-border">
+        <button class="tab-btn active" data-tab="presentation-helper">
+          <span class="tab-icon">📊</span>
+          <span class="tab-text">簡報 15頁限制突破</span>
+        </button>
+        <button class="tab-btn" data-tab="slide-narrative">
+          <span class="tab-icon">🗣️</span>
+          <span class="tab-text">簡報講解口白</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- WORKSPACE TABS CONTENT -->
+    
+    <!-- TAB 1: PRESENTATION HELPER WORKSPACE -->
+    <div id="presentation-helper-workspace" class="workspace-tab-content active">
+      <div class="card card-ppt-prompt" style="margin-bottom: 24px;">
+          <div class="card-num">01</div>
+          <div class="card-header-flex">
+            <div class="card-header-text">
+              <h3>NBLM 全域簡報規劃提示詞</h3>
+              <p>複製下方提示詞貼入 NotebookLM 對話框，進行全域簡報架構與內容規劃</p>
+            </div>
+            <button id="toggle-ppt-prompt-btn" class="toggle-collapse-btn">
+              <span class="toggle-icon">▲</span>
+              <span class="toggle-text">收折提示詞</span>
+            </button>
+          </div>
+
+          <!-- Design Style Selector Component -->
+          <div style="margin-bottom: 20px; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(247, 37, 133, 0.3); border-radius: 12px; padding: 16px;">
+            <div style="font-size: 13px; font-weight: 600; color: #f72585; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+              <span style="display: flex; align-items: center; gap: 6px;">🎨 簡報視覺設計風格庫 (Presentation Design Style Gallery)</span>
+              <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">點選膠囊標籤一鍵注入設計 DNA</span>
+            </div>
+
+            <!-- Style Chips Selector Bar -->
+            <div id="design-style-chips" class="style-chips-container">
+              <!-- Dynamically populated by JS -->
+            </div>
+
+            <!-- Active Design Style Details Card -->
+            <div id="design-style-active-card" class="design-style-card">
+              <!-- Dynamically populated by JS -->
+            </div>
+          </div>
+
+          <!-- Combined Mascot Continuity Injector Section -->
+          <div style="margin-bottom: 20px; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(165, 94, 234, 0.3); border-radius: 12px; padding: 16px;">
+            <div style="font-size: 13px; font-weight: 600; color: #a55eea; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+              <span style="display: flex; align-items: center; gap: 6px;">🎭 吉祥物貫穿與雙主角對談模式 (Mascot Continuity Control)</span>
+              <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">選取主角將其動作與姿勢規範自動寫入全域提示詞</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 14px;">
+              <!-- Mascot Mode Selector -->
+              <div class="form-col">
+                <label for="tab1-mascot-mode" style="font-size: 12px; color: #e0b0ff;">貫穿模式選項</label>
+                <select id="tab1-mascot-mode" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(165, 94, 234, 0.4); color: white; padding: 8px 12px; border-radius: 8px; width: 100%; font-size: 13px;">
+                  <option value="none" selected>🚫 【不套用吉祥物】(純標準簡報簡約風格)</option>
+                  <option value="single">👤 【單主角貫穿模式】(單一吉祥物故事引導)</option>
+                  <option value="dual">👥 【雙主角對談模式】(雙人口白/主持人與專家演練)</option>
+                </select>
+              </div>
+
+              <!-- Single Mascot Role Selector -->
+              <div class="form-col" id="tab1-single-mascot-col" style="display: none;">
+                <label for="tab1-mascot-role" style="font-size: 12px; color: #e0b0ff;">選取主角角色</label>
+                <select id="tab1-mascot-role" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(165, 94, 234, 0.4); color: white; padding: 8px 12px; border-radius: 8px; width: 100%; font-size: 13px;">
+                  <option value="男性 Q版工程師" selected>👨‍💻 男性 Q版工程師</option>
+                  <option value="女性 Q版工程師">👩‍💻 女性 Q版工程師</option>
+                  <option value="男性 Q版商業顧問/PM">💼 男性 Q版商業顧問/PM</option>
+                  <option value="女性 Q版商業顧問/PM">👩‍💼 女性 Q版商業顧問/PM</option>
+                  <option value="男性 Q版科普講師">🎓 男性 Q版科普講師</option>
+                  <option value="女性 Q版科普講師">🎓‍♀️ 女性 Q版科普講師</option>
+                  <option value="可愛 AI 浮空機器人">🤖 可愛 AI 浮空機器人</option>
+                </select>
+              </div>
+
+              <!-- Dual Mascot Role Selectors -->
+              <div class="form-col" id="tab1-dual-mascot-col-a" style="display: none;">
+                <label for="tab1-mascot-role-a" style="font-size: 12px; color: #00d2d3;">主角 A (引導/主持人)</label>
+                <select id="tab1-mascot-role-a" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(0, 210, 211, 0.4); color: white; padding: 8px 12px; border-radius: 8px; width: 100%; font-size: 13px;">
+                  <option value="男性 Q版工程師" selected>👨‍💻 男性 Q版工程師</option>
+                  <option value="女性 Q版工程師">👩‍💻 女性 Q版工程師</option>
+                  <option value="男性 Q版商業顧問/PM">💼 男性 Q版商業顧問/PM</option>
+                  <option value="女性 Q版商業顧問/PM">👩‍💼 女性 Q版商業顧問/PM</option>
+                  <option value="男性 Q版科普講師">🎓 男性 Q版科普講師</option>
+                  <option value="女性 Q版科普講師">🎓‍♀️ 女性 Q版科普講師</option>
+                  <option value="可愛 AI 浮空機器人">🤖 可愛 AI 浮空機器人</option>
+                </select>
+              </div>
+
+              <div class="form-col" id="tab1-dual-mascot-col-b" style="display: none;">
+                <label for="tab1-mascot-role-b" style="font-size: 12px; color: #ffbe76;">主角 B (解答/協同者)</label>
+                <select id="tab1-mascot-role-b" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255, 190, 118, 0.4); color: white; padding: 8px 12px; border-radius: 8px; width: 100%; font-size: 13px;">
+                  <option value="女性 Q版商業顧問/PM" selected>👩‍💼 女性 Q版商業顧問/PM</option>
+                  <option value="男性 Q版工程師">👨‍💻 男性 Q版工程師</option>
+                  <option value="女性 Q版工程師">👩‍💻 女性 Q版工程師</option>
+                  <option value="男性 Q版商業顧問/PM">💼 男性 Q版商業顧問/PM</option>
+                  <option value="男性 Q版科普講師">🎓 男性 Q版科普講師</option>
+                  <option value="女性 Q版科普講師">🎓‍♀️ 女性 Q版科普講師</option>
+                  <option value="可愛 AI 浮空機器人">🤖 可愛 AI 浮空機器人</option>
+                </select>
+              </div>
+
+              <!-- Mascot Drawing Style -->
+              <div class="form-col" id="tab1-mascot-style-col">
+                <label for="tab1-mascot-style" style="font-size: 12px; color: #e0b0ff;">生圖繪製風格</label>
+                <select id="tab1-mascot-style" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(165, 94, 234, 0.4); color: white; padding: 8px 12px; border-radius: 8px; width: 100%; font-size: 13px;">
+                  <option value="2.5D 3D Isometric 立體卡片去背風" selected>🧊 2.5D 3D Isometric 立體卡片去背風</option>
+                  <option value="3D Q版柔光微縮模型風">🧸 3D Q版柔光微縮模型風</option>
+                  <option value="扁平簡約質感幾何風">📐 扁平簡約質感幾何風</option>
+                  <option value="溫馨手繪水彩風格">🎨 溫馨手繪水彩風格</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Mascot Preview Box (Shows when mascot mode is single or dual) -->
+            <div id="tab1-mascot-preview-box" style="display: none; background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(165, 94, 234, 0.3); border-radius: 10px; padding: 12px 14px; gap: 14px; align-items: center; flex-wrap: wrap; transition: all 0.3s ease;">
+              <div style="width: 80px; height: 80px; min-width: 80px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.15); background: #0b0f17; display: flex; align-items: center; justify-content: center;">
+                <img id="tab1-mascot-img" src="images/male_engineer_watercolor.png" alt="吉祥物縮圖" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+              <div style="flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 4px;">
+                <div style="font-size: 13px; font-weight: 600; color: #e0b0ff;" id="tab1-mascot-title">男性 Q版工程師</div>
+                <p style="font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.4;" id="tab1-mascot-desc">
+                  已將吉祥物主角與姿態規範注入全域提示詞中！系統將自動在每頁投影片安排該主角對應主題之動作與場景互動。
+                </p>
+              </div>
+              <!-- Right Side Copy Mascot Image Prompt Button -->
+              <button id="tab1-copy-mascot-prompt-btn" class="action-btn copy-btn" style="background: linear-gradient(135deg, #a55eea, #8854d0); color: white; padding: 8px 16px; font-size: 12px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 6px;">
+                <span class="btn-text">📋 複製生圖 Prompt</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="prompt-preview-box">
+            <pre id="ppt-template-text" class="prompt-text">載入全域簡報規劃提示詞中...</pre>
+          </div>
+          
+          <div class="ppt-actions">
+            <button id="copy-ppt-btn" class="action-btn copy-btn">
+              <span class="btn-text">📋 複製全域規劃提示詞</span>
+            </button>
+            <a href="https://notebooklm.google.com/" target="_blank" class="action-btn link-btn">
+              <span>🚀 開啟 NotebookLM</span>
+            </a>
+          </div>
+        </div>
+
+      <!-- Card 2: YAML Splitter -->
+      <div class="card card-yaml-splitter">
+        <div class="card-num" style="background: linear-gradient(135deg, #a55eea, #c8d6e5); box-shadow: 0 0 10px rgba(165, 94, 234, 0.4);">02</div>
+        <div class="card-header-text">
+          <h3>簡報 YAML 智慧切割器 (YAML Splitter)</h3>
+          <p>將 NotebookLM 一口氣產出的全域 YAML 貼在下方，自動為您處理 10/12 頁上限並生成分段 Parts</p>
+        </div>
+        
+        <div class="splitter-workspace">
+          <div class="splitter-input-area">
+            <div class="form-row" style="margin-bottom: 12px; display: flex; gap: 14px; align-items: center;">
+              <div class="form-col" style="flex: 1;">
+                <label for="ppt-split-limit" style="margin-bottom: 4px; font-size: 13px; color: var(--text-muted);">每組頁數上限 (含錨點頁)</label>
+                <select id="ppt-split-limit" style="width: 100%; padding: 8px; border-radius: 6px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); color: white;">
+                  <option value="10" selected>每組最多 10 頁 (推薦)</option>
+                  <option value="12">每組最多 12 頁</option>
+                </select>
+              </div>
+            </div>
+            <label for="ppt-yaml-input">請貼上 NotebookLM 輸出的完整 YAML：</label>
+            <textarea id="ppt-yaml-input" placeholder="貼上完整的 YAML 代碼（需包含 global_design_specification 與 slide_planning...）" rows="12"></textarea>
+            <div class="splitter-actions" style="display: flex; gap: 12px; margin-top: 12px;">
+              <button id="ppt-split-btn" class="action-btn" style="flex: 3;">
+                <span>✂️ 開始切割 YAML</span>
+              </button>
+              <button id="ppt-clear-btn" class="action-btn" style="flex: 1; background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); color: var(--text-muted);">
+                <span>🧹 清空</span>
+              </button>
+            </div>
+          </div>
+          
+          <div class="splitter-output-area">
+            <label>分段切割結果：</label>
+            <div id="yaml-split-results" class="split-results-placeholder">
+              等待輸入 YAML 並點擊開始切割...
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: SLIDE NARRATIVE WORKSPACE -->
+    <div id="slide-narrative-workspace" class="workspace-tab-content">
+      <div class="main-grid">
+        
+        <!-- LEFT PANEL: PARAMETERS -->
+        <section class="panel-left">
+          
+          <!-- 01 Slide Topic -->
+          <div class="card card-topic">
+            <div class="card-num" style="background: linear-gradient(135deg, #f0932b, #ffbe76); box-shadow: 0 0 10px rgba(240, 147, 43, 0.4);">01</div>
+            <div class="card-header-text">
+              <h3>簡報主題與名稱</h3>
+              <p>設定簡報的主題或點擊下方快速標籤</p>
+            </div>
+            
+            <div class="input-group">
+              <input type="text" id="narrative-topic-input" placeholder="例如：離心式轉動設備機械振動分析、公司年度營運報告..." autocomplete="off">
+            </div>
+            
+            <div class="tags-container">
+              <span class="tag-pill narrative-tag-pill" data-tag="科普教學">🎓 科普教學</span>
+              <span class="tag-pill narrative-tag-pill" data-tag="工業技術">⚙️ 工業技術</span>
+              <span class="tag-pill narrative-tag-pill" data-tag="商業簡報">📊 商業簡報</span>
+              <span class="tag-pill narrative-tag-pill" data-tag="理財分享">📈 理財分享</span>
+              <span class="tag-pill narrative-tag-pill" data-tag="產品介紹">📦 產品介紹</span>
+              <span class="tag-pill narrative-tag-pill" data-tag="法規宣導">⚖️ 法規宣導</span>
+              <span class="tag-pill narrative-tag-pill" data-tag="人生智慧">🧘 人生智慧</span>
+            </div>
+          </div>
+
+          <!-- 02 Presenter Role -->
+          <div class="card card-narrative-role">
+            <div class="card-num" style="background: linear-gradient(135deg, #f0932b, #ffbe76); box-shadow: 0 0 10px rgba(240, 147, 43, 0.4);">02</div>
+            <div class="card-header-text">
+              <h3>發言模式與角色專業人設</h3>
+              <p>選擇單人獨白或雙人對談模式，並設定講解者的角色背景</p>
+            </div>
+
+            <!-- Speech Mode Selector Toggle -->
+            <div class="speech-mode-selector">
+              <button type="button" class="speech-mode-btn active" id="mode-single-btn" data-mode="single">
+                <span>👤 單人獨白模式</span>
+              </button>
+              <button type="button" class="speech-mode-btn" id="mode-dialogue-btn" data-mode="dialogue">
+                <span>🎙️ 雙人對談模式 (A: Host & B: Guest)</span>
+              </button>
+            </div>
+            
+            <!-- Single Mode Controls -->
+            <div id="single-role-container">
+              <div class="form-row">
+                <div class="form-col">
+                  <label>角色職位 / 稱謂 (Role)</label>
+                  <select id="narrative-role-select">
+                    <option value="技術專家 (工程師/科學家)" selected>技術專家 (工程師/科學家)</option>
+                    <option value="通識科普講師">通識科普講師</option>
+                    <option value="資深產品經理 (PM)">資深產品經理 (PM)</option>
+                    <option value="理財與投資顧問">理財與投資顧問</option>
+                    <option value="說故事大師 / 歷史說書人">說故事大師 / 歷史說書人</option>
+                    <option value="法規監察與合規官">法規監察與合規官</option>
+                    <option value="心靈導師 / 人生教練">心靈導師 / 人生教練</option>
+                    <option value="自訂人設">自訂人設 (於下方手動輸入)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-col">
+                  <label>自訂角色名稱 (若選自訂人設)</label>
+                  <input type="text" id="narrative-role-custom" placeholder="例如：資深法務顧問、行銷總監" value="">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-col">
+                  <label>專業背景經歷 (Experience)</label>
+                  <input type="text" id="narrative-background-input" placeholder="例如：擁有數十年現場操作經驗、擅長以幽默方式轉譯專業知識" value="擁有豐富的現場實操與理論分析經驗">
+                </div>
+              </div>
+            </div>
+
+            <!-- Dual Dialogue Mode Controls (Hidden by default) -->
+            <div id="dialogue-role-container" class="dual-roles-container" style="display: none;">
+              <!-- Role A: Host -->
+              <div class="role-box-card role-a">
+                <div class="role-box-header">
+                  <span>🔷 角色 A (主講人 / Host)</span>
+                  <span class="badge-tag">A: 發言標籤</span>
+                </div>
+                <div class="form-row">
+                  <div class="form-col">
+                    <label>角色稱謂 / 職位 (Host Role)</label>
+                    <input type="text" id="dialogue-role-a-title" placeholder="例如：節目主持人 / 資深廣播主持" value="節目主持人 (Host A)">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-col">
+                    <label>主持特色與任務 (Host Task)</label>
+                    <input type="text" id="dialogue-role-a-bg" placeholder="例如：負責開場、引導議題討論、代表聽眾提問與轉場" value="負責開場、引導議題討論、提問與聽眾視角穿針引線">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Role B: Guest -->
+              <div class="role-box-card role-b">
+                <div class="role-box-header">
+                  <span>💜 角色 B (對談者 / Guest)</span>
+                  <span class="badge-tag">B: 發言標籤</span>
+                </div>
+                <div class="form-row">
+                  <div class="form-col">
+                    <label>角色稱謂 / 職位 (Guest Role)</label>
+                    <input type="text" id="dialogue-role-b-title" placeholder="例如：資深理財專家 / 技術總監" value="特邀領域專家 (Guest B)">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-col">
+                    <label>專業背景與優勢 (Guest Background)</label>
+                    <input type="text" id="dialogue-role-b-bg" placeholder="例如：擁有 20 年實務經歷，能以白話深入剖析專業議題" value="擁有 15 年產業與技術實務權威經驗，負責權威精闢解答">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- 03 Tone & Length -->
+          <div class="card card-narrative-tone">
+            <div class="card-num" style="background: linear-gradient(135deg, #f0932b, #ffbe76); box-shadow: 0 0 10px rgba(240, 147, 43, 0.4);">03</div>
+            <div class="card-header-text">
+              <h3>口語調性與字數限制</h3>
+              <p>調整講解時的說話口吻與每一頁投影片的口白字數</p>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-col">
+                <label>講解口白調性 (Tone)</label>
+                <select id="narrative-tone-select">
+                  <option value="專業嚴謹、邏輯清晰、用語精確" selected>專業嚴謹 - 邏輯清晰、用語精確</option>
+                  <option value="生動風趣、通俗易懂、善用日常比喻">生動風趣 - 通俗易懂、善用日常比喻</option>
+                  <option value="故事引導、引人入勝、情感豐富">故事引導 - 引人入勝、情感豐富</option>
+                  <option value="白話易懂、循序漸進、適合初學者">白話易懂 - 循序漸進、適合初學者</option>
+                  <option value="具說服力、直擊痛點、極具商業氣場">具說服力 - 直擊痛點、極具商業氣場</option>
+                  <option value="穩重客觀、條理分明、強調合規與預防">穩重防範 - 穩重客觀、條理分明、強調合規與預防</option>
+                  <option value="溫和謙遜、睿智溫暖、啟發心靈與感悟">溫暖啟發 - 溫和謙遜、睿智溫暖、啟發心靈與感悟</option>
+                </select>
+              </div>
+              <div class="form-col">
+                <label>單頁口白字數限制 (Length)</label>
+                <select id="narrative-length-select">
+                  <option value="150字以內 (極簡精煉，約30秒解說)">150字以內 (極簡精煉)</option>
+                  <option value="50-300字 (結構適中，約0.5-2分鐘解說)" selected>50-300字 (結構適中)</option>
+                  <option value="300-500字 (詳細解說，包含背景推導)">300-500字 (詳細解說)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 04 Structure & Directives -->
+          <div class="card card-narrative-guidelines">
+            <div class="card-num" style="background: linear-gradient(135deg, #f0932b, #ffbe76); box-shadow: 0 0 10px rgba(240, 147, 43, 0.4);">04</div>
+            <div class="card-header-text">
+              <h3>輸出結構與客製微調</h3>
+              <p>設定腳本的排版結構與特定微調要求</p>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-col">
+                <label>口白輸出結構 (Structure)</label>
+                <select id="narrative-structure-select">
+                  <option value="逐頁解說 + 重點整理 (標示每頁主題與 3 個重點項目)" selected>逐頁解說 + 重點整理</option>
+                  <option value="雙人對話逐頁解說 (A: 主持人 + B: 來賓對談，符合自動匯入規範)">雙人對話逐頁解說 (A: 主持人 + B: 來賓對談)</option>
+                  <option value="逐頁解說 + 轉場引導 (包含上一頁到下一頁的口語轉接句)">逐頁解說 + 轉場引導</option>
+                  <option value="純口白逐字稿 (無多餘標題標記，適合錄音直接朗讀)">純口白逐字稿</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-col">
+                <label>客製微調指令 / 特定要求 (Directives)</label>
+                <textarea id="narrative-directives-input" rows="3" placeholder="例如：針對公式推導頁加強步驟解說；或要求語氣更加幽默親切、口白自然切入勿提到頁碼。"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dialogue Guidelines Quick Reference -->
+          <div class="guideline-ref-box">
+            <h4>📖 雙人對話腳本自動匯入與格式規範速查</h4>
+            <p>本系統產出的雙人對講提示詞完全符合「影片製作工坊」100% 自動匯入與配音規範：</p>
+            <div class="guideline-tag-list">
+              <span class="guideline-tag-item">角色 A 標籤：A: 或 A： (最推薦)</span>
+              <span class="guideline-tag-item">角色 B 標籤：B: 或 B： (最推薦)</span>
+              <span class="guideline-tag-item">書寫格式：換行分段 (推薦) / 單行連續</span>
+              <span class="guideline-tag-item">TTS 防崩潰：無括號/無引號/避開諧音字</span>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- RIGHT PANEL: PRESETS & MONITOR -->
+        <section class="panel-right">
+          
+          <!-- Presets -->
+          <div class="card card-presets">
+            <div class="presets-header">
+              <span class="preset-icon" style="color: #f0932b; filter: drop-shadow(0 0 5px rgba(240, 147, 43, 0.3));">🗣️</span>
+              <h3>口白規劃預設模板 · NARRATIVE PRESETS</h3>
+            </div>
+            
+            <div class="preset-section">
+              <span class="preset-section-title">SLIDE NARRATIVE PRESETS</span>
+              <div class="presets-grid presets-grid-single">
+                <button class="preset-btn" id="narrative-preset-technical" style="border-left: 3px solid #f0932b;">
+                  <span class="btn-icon" style="color: #f0932b;">⚙️</span>
+                  <div class="btn-info">
+                    <span class="btn-title">工業技術培訓簡報口白 (專業嚴謹)</span>
+                    <span class="btn-subtitle">技術專家 + 專業嚴謹 ➔ 聚焦操作要領與轉場引導</span>
+                  </div>
+                </button>
+                <button class="preset-btn" id="narrative-preset-science" style="border-left: 3px solid #f0932b;">
+                  <span class="btn-icon" style="color: #f0932b;">🎓</span>
+                  <div class="btn-info">
+                    <span class="btn-title">科普教育教學簡報口白 (生動風趣)</span>
+                    <span class="btn-subtitle">通識講師 + 生動風趣 ➔ 用日常比喻吸引學員</span>
+                  </div>
+                </button>
+                <button class="preset-btn" id="narrative-preset-business" style="border-left: 3px solid #f0932b;">
+                  <span class="btn-icon" style="color: #f0932b;">📊</span>
+                  <div class="btn-info">
+                    <span class="btn-title">產品推廣商業簡報口白 (犀利說服)</span>
+                    <span class="btn-subtitle">產品經理 + 犀利說服 ➔ 聚焦市場痛點與價值傳遞</span>
+                  </div>
+                </button>
+                <button class="preset-btn" id="narrative-preset-law" style="border-left: 3px solid #f0932b;">
+                  <span class="btn-icon" style="color: #f0932b;">⚖️</span>
+                  <div class="btn-info">
+                    <span class="btn-title">企業合規法規宣導簡報口白 (穩重防範)</span>
+                    <span class="btn-subtitle">合規官 + 穩重客觀 ➔ 強調風險防範與合規重要性</span>
+                  </div>
+                </button>
+                <button class="preset-btn" id="narrative-preset-wisdom" style="border-left: 3px solid #f0932b;">
+                  <span class="btn-icon" style="color: #f0932b;">🧘</span>
+                  <div class="btn-info">
+                    <span class="btn-title">人生智慧哲理分享簡報口白 (溫暖啟發)</span>
+                    <span class="btn-subtitle">心靈導師 + 溫暖啟發 ➔ 啟迪思維與引導心靈感悟</span>
+                  </div>
+                </button>
+
+                <!-- Dual Dialogue Presets -->
+                <button class="preset-btn" id="narrative-preset-dialogue-finance" style="border-left: 3px solid #a55eea;">
+                  <span class="btn-icon" style="color: #a55eea;">🎙️</span>
+                  <div class="btn-info">
+                    <span class="btn-title">雙人理財對談簡報口白 (A: 主持人 + B: 專家)</span>
+                    <span class="btn-subtitle">主持人提問引導 + 理財專家權威解說 (A:/B: 格式)</span>
+                  </div>
+                </button>
+                <button class="preset-btn" id="narrative-preset-dialogue-tech" style="border-left: 3px solid #00d2d3;">
+                  <span class="btn-icon" style="color: #00d2d3;">⚙️</span>
+                  <div class="btn-info">
+                    <span class="btn-title">雙人技術專訪簡報口白 (A: PM + B: 架構師)</span>
+                    <span class="btn-subtitle">PM 提問痛點 + 架構師說明工程方案 (A:/B: 格式)</span>
+                  </div>
+                </button>
+                <button class="preset-btn" id="narrative-preset-dialogue-wisdom" style="border-left: 3px solid #ffbe76;">
+                  <span class="btn-icon" style="color: #ffbe76;">🧘</span>
+                  <div class="btn-info">
+                    <span class="btn-title">雙人生智慧哲理對談簡報口白 (A: 對談主持 + B: 心靈導師)</span>
+                    <span class="btn-subtitle">主持人反思提問 + 人生導師睿智引導 (A:/B: 格式)</span>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Monitor -->
+          <div class="card card-monitor">
+            <div class="monitor-header">
+              <div class="monitor-status">
+                <span class="pulse-dot" style="background-color: #f0932b; box-shadow: 0 0 8px #f0932b;"></span>
+                <h3>簡報講解口白指令輸出 · MONITOR</h3>
+              </div>
+            </div>
+            
+            <div class="monitor-area">
+              <pre id="narrative-prompt-output" class="prompt-text">填好設定，即可在此監控生成的簡報講解口白指令...</pre>
+            </div>
+            
+            <div class="monitor-actions">
+              <button id="copy-narrative-btn" class="action-btn copy-btn copy-btn-gold">
+                <span class="btn-text">📋 複製簡報口白指令</span>
+              </button>
+              <a href="https://notebooklm.google.com/" target="_blank" class="action-btn link-btn">
+                <span>🚀 開啟 NotebookLM</span>
+              </a>
+            </div>
+          </div>
+
+        </section>
+        
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer" style="text-align: center; margin-top: 40px; padding: 20px 0; color: var(--text-muted); font-size: 13px; border-top: 1px solid var(--panel-border);">
+      <p>CAST. Studio Slide Edition &copy; 2026 NotebookLM Multi-Modal Prompt Console</p>
+    </footer>
+
+  </div>
+
+  <!-- JavaScript -->
+  <script src="app.js"></script>
 </body>
 </html>

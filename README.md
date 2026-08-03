@@ -85,7 +85,7 @@ flowchart TD
    cd NBLM-Slide-Console
    ```
 2. **開啟工具**：
-   直接雙擊開啟 **`nblm_ppt_helper.html`**（或開啟 `index.html`）即可在瀏覽器中使用！
+   直接雙擊開啟 **`index.html`** 即可在瀏覽器中使用！
 
 ---
 
@@ -93,8 +93,7 @@ flowchart TD
 
 ```text
 .
-├── nblm_ppt_helper.html        # 主控台主要網頁 GUI (極致直觀命名)
-├── index.html                  # 透明跳轉入口網頁 (自動跳轉至 nblm_ppt_helper.html)
+├── index.html                  # 主控台主要網頁 GUI (唯一極致乾淨本體)
 ├── app.js                      # 全域設計 DNA、雙主角構圖與 YAML 切割演算法 (Vanilla JS)
 ├── style.css                   # 現代深色玻璃擬物 UI 設計系統 (Vanilla CSS)
 ├── favicon.ico                 # 專案網頁圖示檔 (多尺寸 16~256px ICO)
