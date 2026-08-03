@@ -36,15 +36,20 @@ function init() {
         } else if (targetTab === "slide-narrative") {
           headerTitle.textContent = "為簡報投影片調配口白與腳本";
           headerDesc.textContent = "設定角色人設與口說調性，一鍵生成高品質投影片講解口白提示詞";
+        } else if (targetTab === "mascot-guide") {
+          headerTitle.textContent = "簡報吉祥物視覺貫穿 (Mascot Continuity)";
+          headerDesc.textContent = "統一角色生圖規範，讓投影片每一頁都擁有連貫且生動的故事引導主角";
         }
       }
 
       if (headerElement) {
-        headerElement.classList.remove("theme-ppt", "theme-narrative");
+        headerElement.classList.remove("theme-ppt", "theme-narrative", "theme-mascot");
         if (targetTab === "presentation-helper") {
           headerElement.classList.add("theme-ppt");
         } else if (targetTab === "slide-narrative") {
           headerElement.classList.add("theme-narrative");
+        } else if (targetTab === "mascot-guide") {
+          headerElement.classList.add("theme-mascot");
         }
       }
     });
@@ -84,8 +89,16 @@ function init() {
     togglePptPromptBtn.addEventListener("click", () => {
       const isCollapsed = pptPromptBox.classList.toggle("collapsed");
       togglePptPromptBtn.classList.toggle("collapsed", isCollapsed);
+      
+      // Guaranteed inline display toggle for absolute collapse
+      pptPromptBox.style.display = isCollapsed ? "none" : "block";
+      
+      const icon = togglePptPromptBtn.querySelector(".toggle-icon");
       const text = togglePptPromptBtn.querySelector(".toggle-text");
       
+      if (icon) {
+        icon.style.transform = isCollapsed ? "rotate(180deg)" : "rotate(0deg)";
+      }
       if (text) {
         text.textContent = isCollapsed ? "展開提示詞" : "收折提示詞";
       }
@@ -553,8 +566,11 @@ function init() {
     });
   }
 
-  // Initial load for narrative workspace
-  loadNarrativePreset("technical");
+  // Initial load for design style gallery
+  initDesignStyleGallery();
+
+  // Initial load for mascot feature
+  initMascotFeature();
 }
 
 // Global speech mode state & switcher
@@ -738,6 +754,799 @@ function updateNarrativePrompt() {
   }
 }
 
+/* ==========================================================================
+   MASCOT CONTINUITY ENGINE & PRESETS
+   ========================================================================== */
+
+const MASCOT_PRESETS = {
+  male_engineer: {
+    name: "男性工安工程師",
+    roleText: "使用來源中定義的男性 Q版工程師角色作為全簡報視覺主角",
+    prompt: "A cute chibi male engineer character design, wearing a safety helmet, professional work clothes, and safety shoes. 2.5D illustration style, 3D isometric, exquisite material details, soft lighting, clean solid white background, full body composition, high quality, masterpiece, 8k resolution."
+  },
+  female_engineer: {
+    name: "女性工安工程師",
+    roleText: "使用來源中定義的女性 Q版工程師角色作為全簡報視覺主角",
+    prompt: "A cute chibi female engineer character design, wearing a safety helmet, professional work clothes, and safety shoes. 2.5D illustration style, 3D isometric, exquisite material details, soft lighting, clean solid white background, full body composition, high quality, masterpiece, 8k resolution."
+  },
+  male_manager: {
+    name: "男性商業顧問/PM",
+    roleText: "使用來源中定義的男性 Q版商業顧問角色作為全簡報視覺主角",
+    prompt: "A cute chibi male business manager character design, wearing a smart dark suit, neat hair, holding a tablet computer. 2.5D illustration style, 3D isometric, clean solid white background, full body, soft studio lighting, high quality, masterpiece, 8k resolution."
+  },
+  female_manager: {
+    name: "女性商業顧問/PM",
+    roleText: "使用來源中定義的女性 Q版商業顧問角色作為全簡報視覺主角",
+    prompt: "A cute chibi female business manager character design, wearing a stylish suit blazer, professional look, holding a tablet computer. 2.5D illustration style, 3D isometric, clean solid white background, full body, soft studio lighting, high quality, masterpiece, 8k resolution."
+  },
+  male_teacher: {
+    name: "男性科普講師",
+    roleText: "使用來源中定義的男性 Q版科普講師角色作為全簡報視覺主角",
+    prompt: "A cute chibi male teacher character design, wearing glasses, a smart casual vest and shirt, holding a pointer stick, friendly expression. 2.5D illustration style, 3D isometric, clean solid white background, full body, soft lighting, 8k resolution."
+  },
+  female_teacher: {
+    name: "女性科普講師",
+    roleText: "使用來源中定義的女性 Q版科普講師角色作為全簡報視覺主角",
+    prompt: "A cute chibi female teacher character design, wearing glasses, a smart casual blazer, holding a pointer stick, warm friendly expression. 2.5D illustration style, 3D isometric, clean solid white background, full body, soft lighting, 8k resolution."
+  },
+  neutral_robot: {
+    name: "可愛 AI 機器人夥伴",
+    roleText: "使用來源中定義的可愛 AI 浮空機器人夥伴作為全簡報視覺主角",
+    prompt: "A cute floating friendly AI robot mascot character design, futuristic sleek metallic white and cyan finish, glowing blue eyes, friendly expression. 3D isometric, clean solid white background, full body, soft studio lighting, masterpiece, 8k resolution."
+  }
+};
+
+const MASCOT_ROLE_MAP = {
+  "男性 Q版工程師": "male_engineer",
+  "女性 Q版工程師": "female_engineer",
+  "男性 Q版商業顧問/PM": "male_manager",
+  "女性 Q版商業顧問/PM": "female_manager",
+  "男性 Q版科普講師": "male_teacher",
+  "女性 Q版科普講師": "female_teacher",
+  "可愛 AI 浮空機器人": "neutral_robot"
+};
+
+function buildGlobalPptPrompt(mascotKey = "none", styleOption = "2.5D 3D Isometric 立體卡片去背風", styleKey = currentDesignStyleKey, dualKeyB = null) {
+  const isDual = mascotKey !== "none" && dualKeyB && dualKeyB !== "none";
+  const hasMascot = mascotKey && mascotKey !== "none" && MASCOT_PRESETS[mascotKey];
+  const mascotInfoA = hasMascot ? MASCOT_PRESETS[mascotKey] : null;
+  const mascotInfoB = isDual ? MASCOT_PRESETS[dualKeyB] : null;
+  const designStyle = (typeof DESIGN_STYLES !== "undefined" && DESIGN_STYLES[styleKey]) ? DESIGN_STYLES[styleKey] : null;
+
+  let mascotDirectiveInSchema = "";
+  let mascotRuleInPrompt = "";
+
+  if (isDual && mascotInfoA && mascotInfoB) {
+    mascotDirectiveInSchema = `
+  mascot_anchors:
+    primary_host: "${mascotInfoA.name} (左下角主講/主持人)"
+    co_host: "${mascotInfoB.name} (右下角解答/協同者)"
+    style: "${styleOption}"
+    composition_rules:
+      layout: "雙主角左右對立分列構圖 (Left-Right Dual Character Composition)"
+      host_A_position: "角色 A (${mascotInfoA.name}) 固定於畫面左下角，姿態與眼神朝向右方內容大標題"
+      host_B_position: "角色 B (${mascotInfoB.name}) 固定於畫面右下角，姿態與眼神朝向左方數據卡片"
+      center_focus: "畫面中央放置核心資訊卡片與數據圖表，營造臨場對談感"
+      visual_cleanliness: "極致簡潔高雅，嚴禁對話氣泡與漫畫框"`;
+
+    mascotRuleInPrompt = `
+- 【📐 雙主角投影片構圖規範 (Dual Mascot Composition)】：
+  1. 角色 A (${mascotInfoA.name}) 固定擺放於投影片【左下角】，姿勢與眼神專注指向右側簡報標題與核心論點。
+  2. 角色 B (${mascotInfoB.name}) 固定擺放於投影片【右下角】，姿勢與眼神專注指向左側數據圖表與分析卡片。
+  3. 畫面中央為主要資訊卡片區，雙角色以左右姿態形成「中央聚焦構圖」，完美配合雙人講解口白的對話脈絡。
+  4. 視覺保持極致乾淨高雅，嚴禁任何對話氣泡或文字漫畫框。`;
+  } else if (hasMascot) {
+    mascotDirectiveInSchema = `
+  mascot_anchor:
+    character_description: "${mascotInfoA.roleText}"
+    style: "${styleOption}"
+    rule: "每一頁簡報的視覺畫面中，必須出現該主角，並根據該頁主題展現適當的互動姿態"`;
+
+    mascotRuleInPrompt = `
+- 【吉祥物貫穿規範】：請務必在每一頁投影片的 visual_description 中安排吉祥物主角（${mascotInfoA.name}），配合該頁主題呈現適當姿態（如封面揮手打招呼、數據頁手持指示棒指向 KPI、流程頁向前走、事故頁思考狀、結尾頁致謝）。`;
+  }
+
+  let globalSpecSection = "";
+  let styleHeaderNotice = "";
+
+  if (designStyle) {
+    styleHeaderNotice = `📌 【當前套用之視覺 DNA】：${designStyle.icon} ${designStyle.name} (背景色: ${designStyle.color_scheme.bg} | 強調色: ${designStyle.color_scheme.accent})\n\n`;
+    globalSpecSection = `${designStyle.presetYaml}${mascotDirectiveInSchema}`;
+  } else {
+    globalSpecSection = `global_design_specification:
+  atmosphere: ["明亮專業", "極簡俐落", "高可讀性"]
+  color_scheme:
+    background: "#FFFFFF"
+    text: "#1E293B"
+    accent: "#2563EB"
+    secondary: "#64748B"
+  typography:
+    heading: "粗體現代無襯線體"
+    body: "清晰易讀內文"
+  layout_rules:
+    navigation: "簡約頁碼標示"
+    image_style: "白底去背高品質圖片"
+    decorative_elements: "極細分隔線與幾何卡片框"${mascotDirectiveInSchema}`;
+  }
+
+  return `${styleHeaderNotice}你是一位頂尖的簡報架構師 (Presentation Architect)。請深入分析目前筆記本中的所有來源文件，並為我規劃**完整且極致豐富**的簡報架構（不要有頁數限制）。你具備以下能力與遵循準則：
+
+【角色定位 (Role Definition)】
+- 逆向工程 (Reverse Engineering): 能深入分析來源文件（如 PDF 簡報、視覺圖片），拆解其設計 DNA，包含氛圍、配色邏輯與版面結構。
+- 結構生成 (Structure Generation): 能根據純文字來源，規劃出具備敘事邏輯與視覺張力的簡報架構。
+
+【核心任務與行為準則 (Core Tasks & Behavior)】
+無論使用者的請求為何，你必須且僅能以 YAML 格式輸出回應（不可包含任何非 YAML 的說明文字）。請嚴格遵守以下邏輯：
+- 規劃**完整**的簡報，不要自我設限在 10 頁內。**為了能深入且完整地覆蓋所有內容，簡報的理想總頁數應設定為至少 12 至 30 頁（請根據來源文件的資訊量與複雜度進行最大化的延展規劃，確保沒有遺漏任何子主題、背景脈絡或細部流程）**。
+- **深度展開與細節化 (Granularity)**：請將來源文件中的每一個章節、核心論點、運作機制、具體步驟、數據表格、案例分析與後續展望，皆拆解並展開為獨立的投影片頁面。**嚴禁為了精簡而合併多個重要觀點到同一頁中**。
+- 每個核心論點規劃為 1 頁（單頁資訊密度為 1 大標題 + 最多 3 個 Bullet points，且在 generation_prompt 中，必須撰寫盡可能詳細、豐富、條理清晰且具備實體細節與排版引導的生成指令，避免過於簡短或抽象描述，以利生成高品質簡報）。
+- 當要求「分析」來源時：觀察來源的視覺特徵，提取出 global_design_specification（全域設計規範），並歸納其內容邏輯，轉化為 slide_planning（頁面規劃）。
+- 當要求「生成」簡報架構時：根據來源內容的主題，將內容拆解為 slide_planning，確保每一頁都有明確的 visual_description 與 generation_prompt。${mascotRuleInPrompt}
+- 移除所有來源的項目編號，確保內容簡潔。
+- 生成的簡報內容不要有字體的名字。
+
+【YAML 輸出標準格式 (Output Schema)】
+所有輸出內容必須嚴格遵守以下 YAML 架構（不可包含任何非 YAML 的 markdown 說明文字），請務必維持欄位的精簡（特別是描述與指令的長度），以防貼入簡報系統時字數超限：
+
+${globalSpecSection}
+
+slide_planning:
+  - page: 1
+    type: "頁面功能 (如：封面、對比頁)"
+    layout_style: "佈局風格 (如：左右分割、滿版聚焦)"
+    visual_description: "畫面視覺與配色描述 (極簡富創意，30字內${hasMascot ? '，包含吉祥物主角互動姿態' : ''})"
+    content:
+      title: "頁面大標題"
+      subtitle: "副標題"
+      generation_prompt: "給 AI 的投影片版面文字生成指令 (包含重點列點與邏輯，請提供盡可能詳細、具體且豐富的排版描述與簡報內容細節，生動且富有深度，至少 50-80 字)"
+
+  - page: 2
+    # 依此類推，持續規劃後續所有頁面...
+
+【編寫規範 (Rules)】
+- 所有字串值必須包裹在雙引號 "" 內。
+- 層級縮排必須準確（2 個空格）。
+- 若來源資訊不足，請根據專業設計邏輯進行「合理推斷」並填入 YAML 中，而非留白。`;
+}
+
+const MASCOT_STYLE_DETAILS = {
+  "2.5D 3D Isometric 立體卡片去背風": {
+    icon: "🧊",
+    img: "images/female_engineer_isometric.png",
+    tags: ["3D Isometric", "去背透卡", "科技現代"],
+    desc: "💡 視覺特色：極具現代科技感的 3D 微縮幾何場景，角色與物件具備立體去背質感，視覺焦點清晰突出。",
+    snippet: "2.5D illustration style, 3D isometric, exquisite material details, soft lighting, clean solid white background",
+    color: "#a55eea"
+  },
+  "3D Q版柔光微縮模型風": {
+    icon: "🧸",
+    img: "images/male_manager_clay.png",
+    tags: ["Q版盲盒", "柔光黏土", "親和療癒"],
+    desc: "💡 視覺特色：圓潤可愛的盲盒公仔/黏土模型質感，帶有溫和攝影柔光與軟膠質感，極具親和力與視覺趣味感。",
+    snippet: "3D chibi style, soft clay model texture, miniature toy figure, studio soft lighting, cute figurine",
+    color: "#00d2d3"
+  },
+  "扁平簡約質感幾何風": {
+    icon: "📐",
+    img: "images/neutral_robot_flat.png",
+    tags: ["Flat Vector", "商務極簡", "專業俐落"],
+    desc: "💡 視覺特色：乾淨優雅的極簡向量插畫，色塊清晰、線條精緻，適合嚴謹的商業簡報、顧問提案與數據報告。",
+    snippet: "Flat vector design, minimal geometric shapes, clean corporate style, elegant layout, modern flat illustration",
+    color: "#ff9f43"
+  },
+  "溫馨手繪水彩風格": {
+    icon: "🎨",
+    img: "images/male_engineer_watercolor.png",
+    tags: ["Hand-drawn", "人文水彩", "溫暖故事"],
+    desc: "💡 視覺特色：富有人文溫度的水彩渲染與手繪筆觸，色彩柔和自然，特別適合教育培訓、公益宣導與故事演講。",
+    snippet: "Warm watercolor texture, hand-drawn illustration, soft pastel color palette, storybook style, artistic",
+    color: "#2ecc71"
+  }
+};
+
+function initMascotFeature() {
+  const pptTemplateText = document.getElementById("ppt-template-text");
+
+  const tab1MascotMode = document.getElementById("tab1-mascot-mode");
+  const tab1SingleMascotCol = document.getElementById("tab1-single-mascot-col");
+  const tab1DualMascotColA = document.getElementById("tab1-dual-mascot-col-a");
+  const tab1DualMascotColB = document.getElementById("tab1-dual-mascot-col-b");
+
+  const tab1MascotRole = document.getElementById("tab1-mascot-role");
+  const tab1MascotRoleA = document.getElementById("tab1-mascot-role-a");
+  const tab1MascotRoleB = document.getElementById("tab1-mascot-role-b");
+  const tab1MascotStyle = document.getElementById("tab1-mascot-style");
+
+  const tab1MascotPreviewBox = document.getElementById("tab1-mascot-preview-box");
+  const tab1MascotImg = document.getElementById("tab1-mascot-img");
+  const tab1MascotTitle = document.getElementById("tab1-mascot-title");
+  const tab1MascotDesc = document.getElementById("tab1-mascot-desc");
+
+  window.updateTab1Prompt = function() {
+    if (!pptTemplateText) return;
+    const mode = tab1MascotMode ? tab1MascotMode.value : "none";
+    const styleVal = tab1MascotStyle ? tab1MascotStyle.value : "2.5D 3D Isometric 立體卡片去背風";
+    const styleDetails = MASCOT_STYLE_DETAILS[styleVal] || MASCOT_STYLE_DETAILS["2.5D 3D Isometric 立體卡片去背風"];
+
+    if (mode === "none") {
+      if (tab1SingleMascotCol) tab1SingleMascotCol.style.display = "none";
+      if (tab1DualMascotColA) tab1DualMascotColA.style.display = "none";
+      if (tab1DualMascotColB) tab1DualMascotColB.style.display = "none";
+      if (tab1MascotPreviewBox) tab1MascotPreviewBox.style.display = "none";
+
+      pptTemplateText.textContent = buildGlobalPptPrompt("none", styleVal, currentDesignStyleKey);
+    } else if (mode === "single") {
+      if (tab1SingleMascotCol) tab1SingleMascotCol.style.display = "flex";
+      if (tab1DualMascotColA) tab1DualMascotColA.style.display = "none";
+      if (tab1DualMascotColB) tab1DualMascotColB.style.display = "none";
+      if (tab1MascotPreviewBox) tab1MascotPreviewBox.style.display = "flex";
+
+      const roleVal = tab1MascotRole ? tab1MascotRole.value : "男性 Q版工程師";
+      const mascotKey = MASCOT_ROLE_MAP[roleVal] || "male_engineer";
+      const mascotDetails = MASCOT_PRESETS[mascotKey];
+
+      if (tab1MascotImg && styleDetails) tab1MascotImg.src = styleDetails.img;
+      if (tab1MascotTitle && mascotDetails) tab1MascotTitle.textContent = `👤 單主角：${mascotDetails.name}`;
+      if (tab1MascotDesc) tab1MascotDesc.textContent = "已將該主角動作與姿態規範注入全域提示詞中！系統將自動在每頁投影片安排該主角對應主題之動作與場景互動。";
+
+      pptTemplateText.textContent = buildGlobalPptPrompt(mascotKey, styleVal, currentDesignStyleKey);
+    } else if (mode === "dual") {
+      if (tab1SingleMascotCol) tab1SingleMascotCol.style.display = "none";
+      if (tab1DualMascotColA) tab1DualMascotColA.style.display = "flex";
+      if (tab1DualMascotColB) tab1DualMascotColB.style.display = "flex";
+      if (tab1MascotPreviewBox) tab1MascotPreviewBox.style.display = "flex";
+
+      const roleA_Title = tab1MascotRoleA ? tab1MascotRoleA.value : "男性 Q版工程師";
+      const roleB_Title = tab1MascotRoleB ? tab1MascotRoleB.value : "女性 Q版商業顧問/PM";
+
+      const keyA = MASCOT_ROLE_MAP[roleA_Title] || "male_engineer";
+      const keyB = MASCOT_ROLE_MAP[roleB_Title] || "female_manager";
+
+      const mascotA = MASCOT_PRESETS[keyA];
+      const mascotB = MASCOT_PRESETS[keyB];
+
+      if (tab1MascotImg && styleDetails) tab1MascotImg.src = styleDetails.img;
+      if (tab1MascotTitle && mascotA && mascotB) tab1MascotTitle.textContent = `👥 雙主角對談：${mascotA.name} ＆ ${mascotB.name}`;
+      if (tab1MascotDesc) tab1MascotDesc.textContent = "已將【雙主角簡報對話對位規範】注入全域提示詞！每頁投影片由雙角色分立左右側專註配合數據對話，無漫畫對話框雜訊。";
+
+      pptTemplateText.textContent = buildGlobalPptPrompt(keyA, styleVal, currentDesignStyleKey, keyB);
+    }
+  };
+
+  if (tab1MascotMode) tab1MascotMode.addEventListener("change", updateTab1Prompt);
+  if (tab1MascotRole) tab1MascotRole.addEventListener("change", updateTab1Prompt);
+  if (tab1MascotRoleA) tab1MascotRoleA.addEventListener("change", updateTab1Prompt);
+  if (tab1MascotRoleB) tab1MascotRoleB.addEventListener("change", updateTab1Prompt);
+  if (tab1MascotStyle) tab1MascotStyle.addEventListener("change", updateTab1Prompt);
+
+  // Copy Tab 1 Mascot Image Prompt
+  const tab1CopyMascotPromptBtn = document.getElementById("tab1-copy-mascot-prompt-btn");
+  if (tab1CopyMascotPromptBtn) {
+    tab1CopyMascotPromptBtn.addEventListener("click", () => {
+      const mode = tab1MascotMode ? tab1MascotMode.value : "single";
+      const styleVal = tab1MascotStyle ? tab1MascotStyle.value : "2.5D 3D Isometric 立體卡片去背風";
+      const styleDetails = MASCOT_STYLE_DETAILS[styleVal] || MASCOT_STYLE_DETAILS["2.5D 3D Isometric 立體卡片去背風"];
+
+      let textToCopy = "";
+      if (mode === "dual") {
+        const roleA_Title = tab1MascotRoleA ? tab1MascotRoleA.value : "男性 Q版工程師";
+        const roleB_Title = tab1MascotRoleB ? tab1MascotRoleB.value : "女性 Q版商業顧問/PM";
+        const keyA = MASCOT_ROLE_MAP[roleA_Title] || "male_engineer";
+        const keyB = MASCOT_ROLE_MAP[roleB_Title] || "female_manager";
+        const mascotA = MASCOT_PRESETS[keyA];
+        const mascotB = MASCOT_PRESETS[keyB];
+        textToCopy = `Dual character design: ${mascotA.promptSnippet} and ${mascotB.promptSnippet}, standing side-by-side discussing charts, ${styleDetails.snippet}`;
+      } else {
+        const roleVal = tab1MascotRole ? tab1MascotRole.value : "男性 Q版工程師";
+        const mascotKey = MASCOT_ROLE_MAP[roleVal] || "male_engineer";
+        const mascotDetails = MASCOT_PRESETS[mascotKey];
+        if (mascotDetails && styleDetails) {
+          textToCopy = `${mascotDetails.basePrompt}, ${styleDetails.snippet}`;
+        }
+      }
+
+      if (textToCopy) {
+        navigator.clipboard.writeText(textToCopy)
+          .then(() => {
+            tab1CopyMascotPromptBtn.classList.add("success");
+            const btnText = tab1CopyMascotPromptBtn.querySelector(".btn-text");
+            if (btnText) btnText.textContent = "✓ 已複製生圖 Prompt！";
+            setTimeout(() => {
+              tab1CopyMascotPromptBtn.classList.remove("success");
+              if (btnText) btnText.textContent = "📋 複製生圖 Prompt";
+            }, 2000);
+          })
+          .catch(err => alert("複製失敗，請手動複製"));
+      }
+    });
+  }
+
+  // Initial prompt builds
+  updateTab1Prompt();
+}
+
+const DESIGN_STYLES = {
+  auto_detect: {
+    key: "auto_detect",
+    name: "自動推導風格 (讓 NBLM 自己決定)",
+    icon: "🪄",
+    category: "AI 智慧推導 / 自由決策",
+    desc: "不指定特定的 Hex 色號與風格，由 NotebookLM 根據來源文件內容主題（如科技、醫學、財務、教學）自動推理並定義最適切的全域設計規範。",
+    color_scheme: { bg: "#FFFFFF (AI推導)", text: "#1E293B", accent: "#2563EB", secondary: "#00D2D3" },
+    presetYaml: `global_design_specification:
+  atmosphere: ["根據來源主題自動定義形容詞1", "形容詞2", "形容詞3"]
+  color_scheme:
+    background: "Hex Code (AI自動推薦明亮潔淨白底)"
+    text: "Hex Code (高對比文字)"
+    accent: "Hex Code (主題重點標示色)"
+    secondary: "Hex Code (次要點綴色)"
+  typography:
+    heading: "根據主題適配之字體與樣式描述"
+    body: "清晰易讀內文字體"
+  layout_rules:
+    navigation: "適合主題之頁碼導覽形式"
+    image_style: "白底去背高品質圖片與圖解"
+    decorative_elements: "配合主題之視覺點綴元素"`
+  },
+  corporate_pro: {
+    key: "corporate_pro",
+    name: "專業企業商務風格",
+    icon: "💻",
+    category: "高階商務 / 對外提案",
+    desc: "明亮灰白底搭配高階藍灰與寶藍 accents，彰顯企業權威與俐落專業質感。",
+    color_scheme: { bg: "#F8FAFC", text: "#0F172A", accent: "#2563EB", secondary: "#475569" },
+    presetYaml: `global_design_specification:
+  atmosphere: ["明亮專業", "俐落沉穩", "企業高階"]
+  color_scheme:
+    background: "#F8FAFC"
+    text: "#0F172A"
+    accent: "#2563EB"
+    secondary: "#475569"
+  typography:
+    heading: "粗體現代無襯線字體，展現大氣質感"
+    body: "清晰易讀的現代無襯線體"
+  layout_rules:
+    navigation: "頁碼與當前章節標示於右上方"
+    image_style: "高質感白底去背 3D 微縮圖與實體物件"
+    decorative_elements: "極細極簡線條、極輕微陰影白底圓角卡片"`
+  },
+  minimal_white: {
+    key: "minimal_white",
+    name: "白底商務簡約風格",
+    icon: "📄",
+    category: "簡約明亮 / 報告",
+    desc: "純白質感背景搭配高對比藍黑主色，乾淨俐落、資訊密度極高。",
+    color_scheme: { bg: "#FFFFFF", text: "#1A1D20", accent: "#0066FF", secondary: "#6C757D" },
+    presetYaml: `global_design_specification:
+  atmosphere: ["極簡俐落", "明亮清晰", "專業商務"]
+  color_scheme:
+    background: "#FFFFFF"
+    text: "#1A1D20"
+    accent: "#0066FF"
+    secondary: "#6C757D"
+  typography:
+    heading: "黑體大標題，極簡高對比"
+    body: "細體內文，極佳閱讀留白"
+  layout_rules:
+    navigation: "簡約底部微型進度條"
+    image_style: "高畫質去背實物圖片"
+    decorative_elements: "極細分隔線、單色極簡卡片圓角邊框"`
+  },
+  financial_exec: {
+    key: "financial_exec",
+    name: "白底高階財經風格",
+    icon: "📈",
+    category: "金融財經 / 數據報告",
+    desc: "典雅米白配合金綠與深藍色系，適合財務報表、投資分析與權威報告。",
+    color_scheme: { bg: "#F8F9FA", text: "#0F172A", accent: "#059669", secondary: "#3B82F6" },
+    presetYaml: `global_design_specification:
+  atmosphere: ["高階財經", "數據驅動", "嚴謹權威"]
+  color_scheme:
+    background: "#F8F9FA"
+    text: "#0F172A"
+    accent: "#059669"
+    secondary: "#3B82F6"
+  typography:
+    heading: "古典襯線/高階黑體相結合"
+    body: "清晰等寬數據排版"
+  layout_rules:
+    navigation: "頁碼標記於左下角，附帶報表日期"
+    image_style: "專業數據圖表與金屬質感徽章"
+    decorative_elements: "Bento Grid 數據網格、精緻微陰影邊框"`
+  },
+  hand_drawn_diary: {
+    key: "hand_drawn_diary",
+    name: "手繪日記風格+主角",
+    icon: "✏️",
+    category: "故事分享 / 溫馨塗鴉",
+    desc: "溫暖紙張質感搭配手繪塗鴉與可愛主角，滿溢親和力與手作溫度。",
+    color_scheme: { bg: "#FAF7F2", text: "#2B2D42", accent: "#E63946", secondary: "#F4A261" },
+    presetYaml: `global_design_specification:
+  atmosphere: ["溫暖手繪", "日常塗鴉", "親和故事"]
+  color_scheme:
+    background: "#FAF7F2"
+    text: "#2B2D42"
+    accent: "#E63946"
+    secondary: "#F4A261"
+  typography:
+    heading: "手寫感溫柔字體風格"
+    body: "親切日常閱讀字體"
+  layout_rules:
+    navigation: "手繪小書籤頁碼標記"
+    image_style: "水彩插畫與手繪塗鴉主角互動"
+    decorative_elements: "手繪圓圈標記、便利貼卡片、紙張膠帶貼裝飾"`
+  },
+  clay_ui: {
+    key: "clay_ui",
+    name: "3D 奶油 UI 科技風格",
+    icon: "🍦",
+    category: "前衛科技 / 產品發表",
+    desc: "柔光黏土與圓潤 3D UI 元素，兼具科技前衛感與柔軟視效。",
+    color_scheme: { bg: "#121824", text: "#F8FAFC", accent: "#A855F7", secondary: "#06B6D4" },
+    presetYaml: `global_design_specification:
+  atmosphere: ["3D柔光", "奶油UI", "未來科技"]
+  color_scheme:
+    background: "#121824"
+    text: "#F8FAFC"
+    accent: "#A855F7"
+    secondary: "#06B6D4"
+  typography:
+    heading: "圓潤現代科技體"
+    body: "乾淨高透閱讀體"
+  layout_rules:
+    navigation: "膠囊形狀的發光進度條"
+    image_style: "3D Claymorphism 盲盒公仔與柔光幾何物件"
+    decorative_elements: "浮空立體按鈕、柔光漸層微縮邊框"`
+  },
+  editorial_mag: {
+    key: "editorial_mag",
+    name: "雜誌編輯風格",
+    icon: "📖",
+    category: "品牌時尚 / 高訂視覺",
+    desc: "大膽版面留白、大字體對比與質感排版，展現雜誌封面的藝術張力。",
+    color_scheme: { bg: "#F4F1EA", text: "#111111", accent: "#D90429", secondary: "#8D99AE" },
+    presetYaml: `global_design_specification:
+  atmosphere: ["雜誌排版", "高訂典雅", "大膽留白"]
+  color_scheme:
+    background: "#F4F1EA"
+    text: "#111111"
+    accent: "#D90429"
+    secondary: "#8D99AE"
+  typography:
+    heading: "經典襯線大字體 (Serif Font)"
+    body: "優雅細緻襯線體"
+  layout_rules:
+    navigation: "雜誌期刊式的細小頁頭文字"
+    image_style: "黑白高品質攝影與去背人物寫真"
+    decorative_elements: "大黑體數字引言、經典雙線分隔排版"`
+  },
+  warm_illustration: {
+    key: "warm_illustration",
+    name: "溫馨插畫風格",
+    icon: "🎨",
+    category: "科普教育 / 感性分享",
+    desc: "柔和暖色調插畫，營造放鬆、友善且易於吸收的感性簡報氛圍。",
+    color_scheme: { bg: "#FFF9F2", text: "#332C27", accent: "#FF8C42", secondary: "#4D908E" },
+    presetYaml: `global_design_specification:
+  atmosphere: ["溫馨友善", "柔和色彩", "輕鬆學習"]
+  color_scheme:
+    background: "#FFF9F2"
+    text: "#332C27"
+    accent: "#FF8C42"
+    secondary: "#4D908E"
+  typography:
+    heading: "溫和圓體/手感字體"
+    body: "舒適閱讀體"
+  layout_rules:
+    navigation: "小圓點進度標示"
+    image_style: "溫馨扁平向量與水彩插畫"
+    decorative_elements: "柔和有機形狀色塊、植物與幾何圖案"`
+  },
+  high_contrast: {
+    key: "high_contrast",
+    name: "高對比度極簡風格",
+    icon: "⬛",
+    category: "簡約極致 / 概念展演",
+    desc: "純黑底高亮鮮黃或純白，極致張力，適合發布會與震撼觀點展示。",
+    color_scheme: { bg: "#000000", text: "#FFFFFF", accent: "#FFE600", secondary: "#00F0FF" },
+    presetYaml: `global_design_specification:
+  atmosphere: ["強烈對比", "極致極簡", "視覺震撼"]
+  color_scheme:
+    background: "#000000"
+    text: "#FFFFFF"
+    accent: "#FFE600"
+    secondary: "#00F0FF"
+  typography:
+    heading: "超粗黑體/幾何字體 (Bold Sans-Serif)"
+    body: "高對比無襯線體"
+  layout_rules:
+    navigation: "純黃色高亮進度方塊"
+    image_style: "高對比單色剪影與Neon發光去背圖"
+    decorative_elements: "極粗黃色邊框、大型強烈標點符號"`
+  },
+  isometric_25d: {
+    key: "isometric_25d",
+    name: "2.5D 等距視角風格+主角",
+    icon: "🧊",
+    category: "科技架構 / 工安流程",
+    desc: "2.5D Isometric 視角透視，適合展示系統架構、工安流程與立體場景。",
+    color_scheme: { bg: "#0F172A", text: "#F8FAFC", accent: "#38BDF8", secondary: "#818CF8" },
+    presetYaml: `global_design_specification:
+  atmosphere: ["2.5D透視", "立體幾何", "清晰連貫"]
+  color_scheme:
+    background: "#0F172A"
+    text: "#F8FAFC"
+    accent: "#38BDF8"
+    secondary: "#818CF8"
+  typography:
+    heading: "現代幾何科技體"
+    body: "乾淨清晰無襯線"
+  layout_rules:
+    navigation: "等距視角方塊導航"
+    image_style: "2.5D Isometric 3D 卡片與去背主角互動"
+    decorative_elements: "立體網格底座、高光透光玻璃卡片"`
+  },
+  flat_illustration: {
+    key: "flat_illustration",
+    name: "扁平化插畫風格",
+    icon: "🎨",
+    category: "商業通用 / 團隊簡報",
+    desc: "經典乾淨向量扁平風格，色彩鮮明活潑，傳達資訊精準無負擔。",
+    color_scheme: { bg: "#F8FAFC", text: "#1E293B", accent: "#2563EB", secondary: "#F59E0B" },
+    presetYaml: `global_design_specification:
+  atmosphere: ["活潑明亮", "向量扁平", "通用商業"]
+  color_scheme:
+    background: "#F8FAFC"
+    text: "#1E293B"
+    accent: "#2563EB"
+    secondary: "#F59E0B"
+  typography:
+    heading: "標準現代無襯線體"
+    body: "簡潔易讀體"
+  layout_rules:
+    navigation: "圓形步驟點進度條"
+    image_style: "彩色向量扁平插畫"
+    decorative_elements: "雙色對比幾何背景色塊"`
+  },
+  nordic_minimal: {
+    key: "nordic_minimal",
+    name: "北歐簡約插畫風格",
+    icon: "🌿",
+    category: "自然永續 / 生活風格",
+    desc: "大地暖灰莫蘭迪配色與北歐植物線條，呈現淡雅高級的生活質感。",
+    color_scheme: { bg: "#F5F3EF", text: "#2D3748", accent: "#E28743", secondary: "#768A76" },
+    presetYaml: `global_design_specification:
+  atmosphere: ["北歐極簡", "自然大地", "優雅平和"]
+  color_scheme:
+    background: "#F5F3EF"
+    text: "#2D3748"
+    accent: "#E28743"
+    secondary: "#768A76"
+  typography:
+    heading: "人文質感襯線體"
+    body: "典雅無襯線體"
+  layout_rules:
+    navigation: "極簡細線頁碼"
+    image_style: "莫蘭迪色系質感手繪插畫"
+    decorative_elements: "弧形幾何色塊、抽象植物線條塗鴉"`
+  },
+  glassmorphism: {
+    key: "glassmorphism",
+    name: "漸層玻璃擬態風格",
+    icon: "✨",
+    category: "前衛設計 / Web3/新潮",
+    desc: "炫彩霓虹漸層與毛玻璃透光質感，營造未來感的極致視覺體驗。",
+    color_scheme: { bg: "#0F0C29", text: "#FFFFFF", accent: "#F72585", secondary: "#4CC9F0" },
+    presetYaml: `global_design_specification:
+  atmosphere: ["玻璃擬態", "夢幻漸層", "前衛現代"]
+  color_scheme:
+    background: "#0F0C29"
+    text: "#FFFFFF"
+    accent: "#F72585"
+    secondary: "#4CC9F0"
+  typography:
+    heading: "未來感漸層字體"
+    body: "高透亮無襯線體"
+  layout_rules:
+    navigation: "發光玻璃按鈕導航"
+    image_style: "半透明毛玻璃卡片與Neon漸層物件"
+    decorative_elements: "微光模糊光圈、半透明透光邊框"`
+  },
+  gamified_ui: {
+    key: "gamified_ui",
+    name: "教育型遊戲UI風格+主角",
+    icon: "🎮",
+    category: "趣味學習 / 闖關培訓",
+    desc: "遊戲化關卡 UI、血條/積分元素與互動主角，大幅提升學習專注度。",
+    color_scheme: { bg: "#1E1B4B", text: "#FFFFFF", accent: "#F59E0B", secondary: "#10B981" },
+    presetYaml: `global_design_specification:
+  atmosphere: ["趣味遊戲", "像素UI", "生動學習"]
+  color_scheme:
+    background: "#1E1B4B"
+    text: "#FFFFFF"
+    accent: "#F59E0B"
+    secondary: "#10B981"
+  typography:
+    heading: "遊戲卡牌風格粗字體"
+    body: "清晰像素感/無襯線體"
+  layout_rules:
+    navigation: "闖關地圖與等級進度條"
+    image_style: "遊戲像素風/Q版角色RPG動態姿態"
+    decorative_elements: "金幣徽章、星級成就卡片、遊戲血條框"`
+  },
+  chemical_process: {
+    key: "chemical_process",
+    name: "化工製程與實驗科學風格",
+    icon: "🧪",
+    category: "化工工程 / 製程解析",
+    desc: "清爽明亮藍白底搭配專業工程藍與青綠重點色，清晰展現化工反應、流體力學與實驗製程。",
+    color_scheme: { bg: "#F4F8FA", text: "#0F172A", accent: "#0284C7", secondary: "#0D9488" },
+    presetYaml: `global_design_specification:
+  atmosphere: ["明亮潔淨", "工程專業", "清晰條理"]
+  color_scheme:
+    background: "#F4F8FA"
+    text: "#0F172A"
+    accent: "#0284C7"
+    secondary: "#0D9488"
+  typography:
+    heading: "專業工程無襯線黑體"
+    body: "清晰易讀技術字體"
+  layout_rules:
+    navigation: "簡約藍色製程流向線條進度條"
+    image_style: "高解析度白底去背 3D 分子結構與反應器圖"
+    decorative_elements: "極細青藍製程線條、白底資訊卡片圓角框"`
+  },
+  safety_risk: {
+    key: "safety_risk",
+    name: "工安事故分析與警示風格",
+    icon: "⚠️",
+    category: "工安檢討 / 事故分析",
+    desc: "明亮潔淨米白底搭配警示紅與安全橙，條理分明、焦點集中，極利於工安案例檢討與避險演練。",
+    color_scheme: { bg: "#FAF9F6", text: "#1E1E1E", accent: "#DC2626", secondary: "#D97706" },
+    presetYaml: `global_design_specification:
+  atmosphere: ["明亮聚焦", "條理清晰", "風險警示"]
+  color_scheme:
+    background: "#FAF9F6"
+    text: "#1E1E1E"
+    accent: "#DC2626"
+    secondary: "#D97706"
+  typography:
+    heading: "醒目無襯線黑體"
+    body: "極佳閱讀條理體"
+  layout_rules:
+    navigation: "簡約黃紅警示小點標示"
+    image_style: "白底去背安全防具與事故示意圖"
+    decorative_elements: "細邊框警示卡片、清晰風險時間軸、紅黃高亮劃重點"`
+  },
+  science_research: {
+    key: "science_research",
+    name: "科普研究與技術解密風格",
+    icon: "🔬",
+    category: "學術科普 / 技術拆解",
+    desc: "實驗室明亮白底搭配研究藍與翡翠綠，圖文並茂，極利於科普解密與複雜技術說明。",
+    color_scheme: { bg: "#F8FAFC", text: "#0F172A", accent: "#0284C7", secondary: "#059669" },
+    presetYaml: `global_design_specification:
+  atmosphere: ["技術拆解", "圖解科普", "清晰可視"]
+  color_scheme:
+    background: "#F8FAFC"
+    text: "#0F172A"
+    accent: "#0284C7"
+    secondary: "#059669"
+  typography:
+    heading: "科研現代黑體大標題"
+    body: "清晰易讀技術內文"
+  layout_rules:
+    navigation: "步驟拆解點陣導覽條"
+    image_style: "高解析度技術拆解圖與科研實驗設備"
+    decorative_elements: "引線標註框 (Callout Lines)、數據對比卡片、實驗流程圖塊"`
+  }
+};
+
+let currentDesignStyleKey = "auto_detect";
+
+function initDesignStyleGallery() {
+  const chipsContainer = document.getElementById("design-style-chips");
+  const activeCardContainer = document.getElementById("design-style-active-card");
+  const pptTemplateText = document.getElementById("ppt-template-text");
+
+  if (!chipsContainer || !activeCardContainer) return;
+
+  function renderChips() {
+    chipsContainer.innerHTML = Object.keys(DESIGN_STYLES).map(key => {
+      const style = DESIGN_STYLES[key];
+      const isActive = (key === currentDesignStyleKey);
+      return `
+        <button class="style-chip-btn ${isActive ? 'active' : ''}" data-style="${key}">
+          <span>${style.icon}</span>
+          <span>${style.name}</span>
+        </button>
+      `;
+    }).join("");
+
+    const chipBtns = chipsContainer.querySelectorAll(".style-chip-btn");
+    chipBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const key = btn.getAttribute("data-style");
+        selectDesignStyle(key);
+      });
+    });
+  }
+
+  function selectDesignStyle(key) {
+    if (!DESIGN_STYLES[key]) return;
+    currentDesignStyleKey = key;
+    renderChips();
+    renderActiveCard(key);
+
+    if (typeof window.updateTab1Prompt === "function") {
+      window.updateTab1Prompt();
+    }
+
+    if (pptTemplateText) {
+      pptTemplateText.style.transition = "box-shadow 0.3s ease";
+      pptTemplateText.style.boxShadow = "0 0 24px rgba(247, 37, 133, 0.75)";
+      setTimeout(() => {
+        pptTemplateText.style.boxShadow = "";
+      }, 1500);
+    }
+  }
+
+  function renderActiveCard(key) {
+    const style = DESIGN_STYLES[key];
+    if (!style) return;
+
+    activeCardContainer.innerHTML = `
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 4px; height: 24px; background: linear-gradient(to bottom, #f72585, #7209b7); border-radius: 2px;"></div>
+          <h4 style="font-size: 16px; font-weight: 700; color: #ffffff; margin: 0; display: flex; align-items: center; gap: 8px;">
+            <span>${style.icon}</span> ${style.name}
+          </h4>
+        </div>
+        <span style="font-size: 11px; font-weight: 600; background: rgba(247, 37, 133, 0.15); border: 1px solid rgba(247, 37, 133, 0.4); color: #ff85a1; padding: 4px 12px; border-radius: 12px;">
+          ${style.category}
+        </span>
+      </div>
+
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5;">
+        ${style.desc}
+      </p>
+
+      <!-- Color Palette Swatches -->
+      <div class="style-swatch-list" style="margin-bottom: 16px;">
+        <span style="font-size: 11.5px; color: var(--text-muted); font-weight: 500;">設計色盤:</span>
+        <div class="style-swatch-item">
+          <span class="swatch-color-dot" style="background: ${style.color_scheme.bg};"></span>
+          <span>背景: ${style.color_scheme.bg}</span>
+        </div>
+        <div class="style-swatch-item">
+          <span class="swatch-color-dot" style="background: ${style.color_scheme.text};"></span>
+          <span>文字: ${style.color_scheme.text}</span>
+        </div>
+        <div class="style-swatch-item">
+          <span class="swatch-color-dot" style="background: ${style.color_scheme.accent};"></span>
+          <span>強調標示色: ${style.color_scheme.accent}</span>
+        </div>
+        <div class="style-swatch-item">
+          <span class="swatch-color-dot" style="background: ${style.color_scheme.secondary};"></span>
+          <span>點綴色: ${style.color_scheme.secondary}</span>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end;">
+        <button class="action-btn" style="background: linear-gradient(135deg, #f72585, #7209b7); color: white; padding: 8px 18px; font-size: 13px; font-weight: 600; border-radius: 8px; border: none; cursor: default; display: flex; align-items: center; gap: 6px;">
+          <span>✓ 已將此風格 DNA 注入全域提示詞</span>
+        </button>
+      </div>
+    `;
+  }
+
+  // Initial render
+  renderChips();
+  renderActiveCard(currentDesignStyleKey);
+}
+
 // Initialize on DOM load
 document.addEventListener("DOMContentLoaded", init);
+
 
