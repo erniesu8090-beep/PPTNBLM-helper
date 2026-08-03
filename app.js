@@ -826,22 +826,25 @@ function buildGlobalPptPrompt(mascotKey = "none", styleOption = "2.5D 3D Isometr
   if (isDual && mascotInfoA && mascotInfoB) {
     mascotDirectiveInSchema = `
   mascot_anchors:
-    primary_host: "${mascotInfoA.name} (左下角主講/主持人)"
-    co_host: "${mascotInfoB.name} (右下角解答/協同者)"
+    primary_host: "${mascotInfoA.name} (主講/主持人)"
+    co_host: "${mascotInfoB.name} (解答/協同者)"
     style: "${styleOption}"
-    composition_rules:
-      layout: "雙主角左右對立分列構圖 (Left-Right Dual Character Composition)"
-      host_A_position: "角色 A (${mascotInfoA.name}) 固定於畫面左下角，姿態與眼神朝向右方內容大標題"
-      host_B_position: "角色 B (${mascotInfoB.name}) 固定於畫面右下角，姿態與眼神朝向左方數據卡片"
-      center_focus: "畫面中央放置核心資訊卡片與數據圖表，營造臨場對談感"
-      visual_cleanliness: "極致簡潔高雅，嚴禁對話氣泡與漫畫框"`;
+    auto_composition_logic:
+      rule: "根據每頁內容主題自動在【左右對分構圖】與【主次輔助構圖】之間切換"
+      dialogue_mode: "對比、辯論與數據頁採用『角色 A (左下角) ↔ 角色 B (右下角)，眼神聚焦中央卡片』"
+      assistant_mode: "單一重點、警示與總結頁採用『角色 A (主講大標題)，角色 B (小尺寸點綴於 Callout 提示框旁)』"
+      visual_cleanliness: "畫面極致簡潔高雅，嚴禁對話氣泡與漫畫框"`;
 
     mascotRuleInPrompt = `
-- 【📐 雙主角投影片構圖規範 (Dual Mascot Composition)】：
-  1. 角色 A (${mascotInfoA.name}) 固定擺放於投影片【左下角】，姿勢與眼神專注指向右側簡報標題與核心論點。
-  2. 角色 B (${mascotInfoB.name}) 固定擺放於投影片【右下角】，姿勢與眼神專注指向左側數據圖表與分析卡片。
-  3. 畫面中央為主要資訊卡片區，雙角色以左右姿態形成「中央聚焦構圖」，完美配合雙人講解口白的對話脈絡。
-  4. 視覺保持極致乾淨高雅，嚴禁任何對話氣泡或文字漫畫框。`;
+- 【📐 雙主角投影片 AI 自適應構圖規範 (Smart Dual Composition)】：
+  請根據每一頁投影片的主題與對話脈絡，**自動選擇最具視覺表現力的構圖方式**（畫面保持極致乾淨，嚴禁加入對話氣泡與文字漫畫框）：
+  1. **【左右對位構圖 (Left-Right Dialogue)】** (適用於：對比頁、討論頁、案例數據分析頁)：
+     - 角色 A (${mascotInfoA.name}) 固定於【左下角】，眼神指向右側大標題。
+     - 角色 B (${mascotInfoB.name}) 固定於【右下角】，眼神指向左側數據圖表。
+     - 畫面中央為核心資訊卡片，打造臨場雙人對談感。
+  2. **【主次輔助構圖 (Primary & Assistant)】** (適用於：封面頁、單一重點頁、風險警示頁、結尾致謝頁)：
+     - 角色 A (${mascotInfoA.name}) 作為【左側主講者】，引導全頁核心標題。
+     - 角色 B (${mascotInfoB.name}) 採用【小尺寸】，浮空或靜置於右側關鍵 Callout 高亮提示框旁進行重點補充。`;
   } else if (hasMascot) {
     mascotDirectiveInSchema = `
   mascot_anchor:
