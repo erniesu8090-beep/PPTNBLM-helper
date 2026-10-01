@@ -423,7 +423,7 @@ function init() {
       background: "擅長將深奧科學原理解碼為日常趣味比喻的科普作家",
       tone: "生動風趣、通俗易懂、善用日常比喻",
       length: "50-300字 (結構適中，約0.5-2分鐘解說)",
-      structure: "逐頁解說 + 重點整理 (標示每頁主題與 3 個重點項目)",
+      structure: "逐頁解說 + 轉場引導 (包含上一頁到下一頁的口語轉接句)",
       directives: "多用「想像一下...」或問句開頭，將蒸發、凝結比喻成煮開水與冰水杯壁的露水，適合國中學生聽講。"
     },
     business: {
@@ -434,7 +434,7 @@ function init() {
       background: "具備多年 SaaS 產品規劃與企業客戶提案經驗的資深經理",
       tone: "具說服力、直擊痛點、極具商業氣場",
       length: "150字以內 (極簡精煉，約30秒解說)",
-      structure: "逐頁解說 + 重點整理 (標示每頁主題與 3 個重點項目)",
+      structure: "逐頁解說 + 轉場引導 (包含上一頁到下一頁的口語轉接句)",
       directives: "簡報口白聚焦在產品如何幫客戶『降低 30% 損耗率』與『提升 15% 提袋率』，用詞明快精煉，直擊商業價值。"
     },
     law: {
@@ -445,7 +445,7 @@ function init() {
       background: "具備多年企業合規審查與法律風險防範經驗的資深法務專家",
       tone: "穩重客觀、條理分明、強調合規與預防",
       length: "50-300字 (結構適中，約0.5-2分鐘解說)",
-      structure: "逐頁解說 + 重點整理 (標示每頁主題與 3 個重點項目)",
+      structure: "逐頁解說 + 轉場引導 (包含上一頁到下一頁的口語轉接句)",
       directives: "用語應嚴謹客觀且條理分明，重點提醒法規風險防範與案例警示，強調企業誠信經營之核心價值。"
     },
     wisdom: {
@@ -456,7 +456,7 @@ function init() {
       background: "深研中西哲學與個人成長諮商十餘年、擅長引導心靈反思的人生導師",
       tone: "溫和謙遜、睿智溫暖、啟發心靈與感悟",
       length: "50-300字 (結構適中，約0.5-2分鐘解說)",
-      structure: "逐頁解說 + 重點整理 (標示每頁主題與 3 個重點項目)",
+      structure: "逐頁解說 + 轉場引導 (包含上一頁到下一頁的口語轉接句)",
       directives: "用詞需溫柔且富有洞察力，適當融入古人哲理與生活反思，幫助聽眾將職場摩擦轉化為自我修煉的契機。"
     },
     "dialogue-finance": {
@@ -590,7 +590,7 @@ function setSpeechMode(mode) {
     if (singleRoleContainer) singleRoleContainer.style.display = "block";
     if (dialogueRoleContainer) dialogueRoleContainer.style.display = "none";
     if (structureSelectEl && structureSelectEl.value.includes("雙人對話")) {
-      structureSelectEl.value = "逐頁解說 + 重點整理 (標示每頁主題與 3 個重點項目)";
+      structureSelectEl.value = "逐頁解說 + 轉場引導 (包含上一頁到下一頁的口語轉接句)";
     }
   } else {
     if (singleModeBtn) singleModeBtn.classList.remove("active");
@@ -614,7 +614,7 @@ function updateNarrativePrompt() {
   const lengthSelectEl = document.getElementById("narrative-length-select");
   const length = lengthSelectEl ? lengthSelectEl.value : "50-300字 (結構適中)";
   const structureSelectEl = document.getElementById("narrative-structure-select");
-  const structure = structureSelectEl ? structureSelectEl.value : "逐頁解說 + 重點整理";
+  const structure = structureSelectEl ? structureSelectEl.value : "逐頁解說 + 轉場引導 (包含上一頁到下一頁的口語轉接句)";
   const directivesInputEl = document.getElementById("narrative-directives-input");
   const directives = (directivesInputEl ? directivesInputEl.value.trim() : "") || "無特殊微調指令";
 
@@ -703,13 +703,11 @@ function updateNarrativePrompt() {
     const bgInputEl = document.getElementById("narrative-background-input");
     const background = (bgInputEl ? bgInputEl.value.trim() : "") || "未設定專業背景";
 
-    let structureGuide = "";
+    let structureGuide = `請在每頁的口白結尾處，自然融入一兩句轉場銜接句子，能順暢銜接下一頁簡報的主題內容，讓簡報錄影的語氣聽起來自然流暢、一氣呵成。請直接將此轉場銜接句接在口白尾端，嚴禁加註「(轉場引導句)」、「轉場引導：」等任何註記、括號或星號。`;
     if (structure.includes("重點整理")) {
-      structureGuide = `請在每頁的口白下方，以條列式列出 3 個「本頁核心重點整理 (Key Takeaways)」，方便簡報錄製者快速抓到核心要點。`;
-    } else if (structure.includes("轉場引導")) {
-      structureGuide = `請在每頁的口白結尾處，自然融入一兩句轉場銜接句子，能順暢銜接下一頁簡報的主題內容，讓簡報錄影的語氣聽起來自然流暢、一氣呵成。請直接將此轉場銜接句接在口白尾端，嚴禁加註「(轉場引導句)」、「轉場引導：」等任何註記、括號或星號。`;
-    } else {
-      structureGuide = `請僅輸出純口白逐字稿。無須輸出多餘的標題標記、重點整理或轉場說明，以利錄音設備直接朗讀或轉換為旁白音軌。`;
+      structureGuide += `\n   - 另外，請在每頁的口白下方，以條列式列出 3 個「本頁核心重點整理 (Key Takeaways)」，方便簡報錄製者快速抓到核心要點。`;
+    } else if (structure.includes("純口白")) {
+      structureGuide += `\n   - 備註：請僅輸出純口白逐字稿，無須輸出多餘的標題標記或重點整理說明。`;
     }
 
     finalPrompt = `你是一位簡報講解專家與幕後口白配音導演。請閱讀我所提供的來源簡報文檔（或簡報內容大綱），並針對主題「${topic}」為我產出高品質、符合特定角色人設與口說調性的簡報講解口白與腳本。
@@ -742,7 +740,7 @@ function updateNarrativePrompt() {
 - 所有講解口白均應使用繁體中文（台灣）呈現，語氣要像是一對口頭報告般自然、生動且具口語感。
 - 嚴格僅依據上傳的簡報內容大綱進行解說與提煉，不可憑空捏造簡報中未提及的實證數據或事實。
 - 口白與字幕文本中嚴禁出現任何不必要的星號「*」（例如用以表示粗體或強調的 ** 或 *），請一律以純文字格式輸出。
-- 如果包含轉場引導句，請直接將轉場句子自然連貫地接在口白解說內文的最末尾，絕對不需要且嚴禁額外加註「(轉場引導句)」、「轉場引導：」等任何標籤、括號或註記。
+- 請直接將每頁的轉場銜接句子自然連貫地接在口白解說內文的最末尾，絕對不需要且嚴禁額外加註「(轉場引導句)」、「轉場引導：」等任何標籤、括號或註記。
 - 【重要：語音合成防崩潰限制】：
   1. 嚴禁在口白與配音內文中使用「雞排」及任何讀音為 jī pái 的諧音字（如：炸雞排、吉排、積排、基牌等），請以「下午茶」、「點心」、「雞肉排」或「炸雞」等字眼替代。
   2. 嚴禁在口白與配音內文中使用任何中英文引號（如「」、『』、“”）、書名號（如《》）或括號（如()、[]、{}），請以純文字或空格取代，以防止微調 TTS 解析時無聲或生成失敗。`;
