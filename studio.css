@@ -145,3 +145,45 @@ button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+/* Role library and clear separation between cast and drawing-style samples. */
+.mascot-controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-bottom: 18px; }
+.mascot-controls > * { min-width: 0; }
+.mascot-section select { min-height: 42px; text-overflow: ellipsis; }
+.mascot-library-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.mascot-library-heading strong { font-size: 13px; color: #d3dfca; }
+.mascot-library-heading span { font-size: 11px; color: var(--text-muted); margin-left: 12px; }
+.mascot-targets { display: flex; gap: 6px; }
+.mascot-targets button { background: #20261e; color: #b9c6b1; border: 1px solid #424e3d; border-radius: 6px; padding: 8px 12px; cursor: pointer; }
+.mascot-targets button[aria-pressed="true"] { background: #394833; color: #e5efdb; border-color: #abc295; }
+.mascot-role-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(142px, 1fr)); gap: 8px; margin-bottom: 18px; }
+.mascot-role-card { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 13px; border: 1px solid #354031; border-radius: 9px; color: #e2e8dc; background: #1c221a; cursor: pointer; text-align: left; transition: border-color .15s, background .15s; }
+.mascot-role-card:hover { background: #293224; border-color: #74876a; }
+.mascot-role-card[aria-pressed="true"] { background: #2c3826; border-color: #b7ce9f; }
+.mascot-role-icon { font-size: 26px; line-height: 1.3; }
+.mascot-role-card strong { font-size: 12px; font-weight: 600; }
+.mascot-role-card small { font-size: 10px; color: #aab6a3; line-height: 1.5; }
+.mascot-card-check { display: none; position: absolute; right: 12px; top: 12px; color: #d3e9b9; }
+.mascot-role-card[aria-pressed="true"] .mascot-card-check { display: block; }
+.mascot-preview { display: flex; align-items: center; flex-wrap: wrap; gap: 18px; border-top: 1px solid #3d4936; padding-top: 18px; }
+.mascot-cast { display: flex; gap: 10px; }
+.mascot-cast-person { width: 106px; min-height: 110px; padding: 12px 6px; background: #252e20; border: 1px solid #414e38; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; }
+.mascot-cast-person > span { font-size: 40px; }
+.mascot-cast-person small { color: #d2dec8; font-size: 10px; text-align: center; }
+.mascot-preview-copy { flex: 1 1 220px; min-width: 0; }
+.mascot-applied { font-size: 10px; color: #bdd2a9; }
+.mascot-preview-copy h4 { font-size: 14px; color: #e0e9d7; margin: 7px 0; }
+.mascot-preview-copy p { font-size: 12px; color: var(--text-muted); line-height: 1.8; margin: 0; }
+.mascot-preview-copy .mascot-selection-note { font-size: 10px; color: #a2b198; margin-top: 6px; }
+.mascot-style-sample { display: flex; align-items: center; gap: 10px; flex: 0 1 180px; }
+.mascot-style-sample img { width: 56px; height: 66px; object-fit: contain; background: #f7f7f2; border-radius: 6px; }
+.mascot-style-sample span { font-size: 11px; line-height: 1.6; color: #cbd6c3; }
+.mascot-style-sample small { font-size: 10px; color: #a5b29b; }
+#tab1-copy-mascot-prompt-btn { flex: 0 0 auto; width: auto; padding: 11px 15px; font-size: 12px; }
+@media (max-width: 600px) {
+  .mascot-controls { grid-template-columns: minmax(0, 1fr); }
+  .mascot-role-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mascot-library-heading span { display: block; margin: 5px 0 0; }
+  .mascot-preview { gap: 14px; }
+  .mascot-cast { width: 100%; }
+  #tab1-copy-mascot-prompt-btn { width: 100%; justify-content: center; }
+}

@@ -124,20 +124,20 @@
           </div>
 
           <!-- Combined Mascot Continuity Injector Section -->
-          <div class="settings-section" style="margin-bottom: 20px; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(165, 94, 234, 0.3); border-radius: 12px; padding: 16px;">
+          <div class="settings-section mascot-section" style="margin-bottom: 20px; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(165, 94, 234, 0.3); border-radius: 12px; padding: 16px;">
             <div style="font-size: 13px; font-weight: 600; color: #a55eea; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
               <span style="display: flex; align-items: center; gap: 6px;">角色與吉祥物</span>
-              <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">選取主角將其動作與姿勢規範自動寫入全域提示詞</span>
+              <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">選角色、定風格，讓每頁簡報都有一致的引導者</span>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 14px;">
+            <div class="mascot-controls">
               <!-- Mascot Mode Selector -->
               <div class="form-col">
                 <label for="tab1-mascot-mode" style="font-size: 12px; color: #e0b0ff;">貫穿模式選項</label>
                 <select id="tab1-mascot-mode" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(165, 94, 234, 0.4); color: white; padding: 8px 12px; border-radius: 8px; width: 100%; font-size: 13px;">
-                  <option value="none" selected>🚫 【不套用吉祥物】(純標準簡報簡約風格)</option>
-                  <option value="single">👤 【單主角貫穿模式】(單一吉祥物故事引導)</option>
-                  <option value="dual">👥 【雙主角對談模式】(雙人口白/主持人與專家演練)</option>
+                  <option value="none" selected>不使用角色 · 簡約簡報</option>
+                  <option value="single">單主角 · 故事引導</option>
+                  <option value="dual">雙主角 · 主持與協作</option>
                 </select>
               </div>
 
@@ -194,20 +194,30 @@
               </div>
             </div>
 
-            <!-- Mascot Preview Box (Shows when mascot mode is single or dual) -->
-            <div id="tab1-mascot-preview-box" style="display: none; background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(165, 94, 234, 0.3); border-radius: 10px; padding: 12px 14px; gap: 14px; align-items: center; flex-wrap: wrap; transition: all 0.3s ease;">
-              <div style="width: 80px; height: 80px; min-width: 80px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.15); background: #0b0f17; display: flex; align-items: center; justify-content: center;">
-                <img id="tab1-mascot-img" src="images/male_engineer_watercolor.png" alt="吉祥物縮圖" style="width: 100%; height: 100%; object-fit: cover;">
+            <div id="mascot-library" hidden>
+              <div class="mascot-library-heading">
+                <div><strong>角色庫</strong><span>13 位引導夥伴，點選即可套用</span></div>
+                <div id="mascot-targets" class="mascot-targets" role="group" aria-label="選擇要設定的角色" hidden>
+                  <button type="button" data-target="a" aria-pressed="true">設定主角 A</button>
+                  <button type="button" data-target="b" aria-pressed="false">設定主角 B</button>
+                </div>
               </div>
-              <div style="flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 4px;">
-                <div style="font-size: 13px; font-weight: 600; color: #e0b0ff;" id="tab1-mascot-title">男性 Q版工程師</div>
-                <p style="font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.4;" id="tab1-mascot-desc">
-                  已將吉祥物主角與姿態規範注入全域提示詞中！系統將自動在每頁投影片安排該主角對應主題之動作與場景互動。
-                </p>
+              <div id="mascot-role-cards" class="mascot-role-cards" role="group" aria-label="角色庫"></div>
+            </div>
+            <div id="tab1-mascot-preview-box" class="mascot-preview" style="display: none;">
+              <div id="mascot-cast" class="mascot-cast" aria-label="已選角色"></div>
+              <div class="mascot-preview-copy" aria-live="polite" aria-atomic="true">
+                <span class="mascot-applied">✓ 已套用至全域提示詞</span>
+                <h4 id="tab1-mascot-title"></h4>
+                <p id="tab1-mascot-desc"></p>
+                <p id="mascot-selection-note" class="mascot-selection-note"></p>
               </div>
-              <!-- Right Side Copy Mascot Image Prompt Button -->
-              <button id="tab1-copy-mascot-prompt-btn" class="action-btn copy-btn" style="background: linear-gradient(135deg, #a55eea, #8854d0); color: white; padding: 8px 16px; font-size: 12px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 6px;">
-                <span class="btn-text">📋 複製生圖 Prompt</span>
+              <div class="mascot-style-sample">
+                <img id="tab1-mascot-img" src="images/male_engineer_watercolor.png" alt="繪圖風格參考，非所選角色成品">
+                <span>繪圖風格參考<br><small id="mascot-style-label"></small></span>
+              </div>
+              <button type="button" id="tab1-copy-mascot-prompt-btn" class="action-btn copy-btn">
+                <span class="btn-text">📋 複製角色生圖提示詞</span>
               </button>
             </div>
           </div>

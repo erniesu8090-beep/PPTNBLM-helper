@@ -650,44 +650,37 @@ const MASCOT_PRESETS = {
   male_engineer: {
     name: "男性工安工程師 (CPC 安全帽)",
     roleText: "使用來源中定義的男性 Q版工程師角色（戴有 CPC 標誌黃色安全帽）作為全簡報視覺主角",
-    promptSnippet: "a cute chibi male engineer wearing a yellow safety helmet with CPC logo",
-    prompt: "A cute chibi male engineer character design, wearing a yellow safety helmet with CPC logo, professional work clothes, and safety shoes. 2.5D illustration style, 3D isometric, exquisite material details, soft lighting, clean solid white background, full body composition, high quality, masterpiece, 8k resolution."
+    promptSnippet: "a friendly adult male safety engineer with short dark hair, yellow safety helmet with a reserved CPC logo patch, slate-blue long-sleeve coveralls with reflective strips, brown safety boots, and a small closed inspection clipboard"
   },
   female_engineer: {
     name: "女性工安工程師 (CPC 安全帽)",
     roleText: "使用來源中定義的女性 Q版工程師角色（戴有 CPC 標誌黃色安全帽）作為全簡報視覺主角",
-    promptSnippet: "a cute chibi female engineer wearing a yellow safety helmet with CPC logo",
-    prompt: "A cute chibi female engineer character design, wearing a yellow safety helmet with CPC logo, professional work clothes, and safety shoes. 2.5D illustration style, 3D isometric, exquisite material details, soft lighting, clean solid white background, full body composition, high quality, masterpiece, 8k resolution."
+    promptSnippet: "a friendly adult female safety engineer with dark hair secured under a yellow safety helmet with a reserved CPC logo patch, slate-blue long-sleeve coveralls with reflective strips, brown safety boots, and a small closed inspection clipboard"
   },
   male_manager: {
     name: "男性商業顧問/PM",
     roleText: "使用來源中定義的男性 Q版商業顧問角色作為全簡報視覺主角",
-    promptSnippet: "a cute chibi male business manager wearing a suit",
-    prompt: "A cute chibi male business manager character design, wearing a smart dark suit, neat hair, holding a tablet computer. 2.5D illustration style, 3D isometric, clean solid white background, full body, soft studio lighting, high quality, masterpiece, 8k resolution."
+    promptSnippet: "an approachable adult male business consultant with neatly side-parted dark hair, navy suit, ivory shirt, muted teal tie, brown shoes, and a slim tablet held at waist level"
   },
   female_manager: {
     name: "女性商業顧問/PM",
     roleText: "使用來源中定義的女性 Q版商業顧問角色作為全簡報視覺主角",
-    promptSnippet: "a cute chibi female business manager wearing a suit blazer",
-    prompt: "A cute chibi female business manager character design, wearing a stylish suit blazer, professional look, holding a tablet computer. 2.5D illustration style, 3D isometric, clean solid white background, full body, soft studio lighting, high quality, masterpiece, 8k resolution."
+    promptSnippet: "an approachable adult female business consultant with a neat dark bob, navy blazer and matching trousers, ivory blouse, muted teal scarf, brown low-heeled shoes, and a slim tablet held at waist level"
   },
   male_teacher: {
     name: "男性科普講師",
     roleText: "使用來源中定義的男性 Q版科普講師角色作為全簡報視覺主角",
-    promptSnippet: "a cute chibi male teacher wearing glasses and vest",
-    prompt: "A cute chibi male teacher character design, wearing glasses, a smart casual vest and shirt, holding a pointer stick, friendly expression. 2.5D illustration style, 3D isometric, clean solid white background, full body, soft lighting, 8k resolution."
+    promptSnippet: "a warm adult male science educator with short chestnut hair, round glasses, cream shirt, sage-green knitted vest, charcoal trousers, brown shoes, and a short presentation pointer"
   },
   female_teacher: {
     name: "女性科普講師",
     roleText: "使用來源中定義的女性 Q版科普講師角色作為全簡報視覺主角",
-    promptSnippet: "a cute chibi female teacher wearing glasses and blazer",
-    prompt: "A cute chibi female teacher character design, wearing glasses, a smart casual blazer, holding a pointer stick, warm friendly expression. 2.5D illustration style, 3D isometric, clean solid white background, full body, soft lighting, 8k resolution."
+    promptSnippet: "a warm adult female science educator with shoulder-length chestnut hair, round glasses, sage-green blazer over a cream blouse, charcoal trousers, brown shoes, and a short presentation pointer"
   },
   neutral_robot: {
     name: "可愛 AI 機器人夥伴",
     roleText: "使用來源中定義的可愛 AI 浮空機器人夥伴作為全簡報視覺主角",
-    promptSnippet: "a cute floating friendly AI robot mascot",
-    prompt: "A cute floating friendly AI robot mascot character design, futuristic sleek metallic white and cyan finish, glowing blue eyes, friendly expression. 3D isometric, clean solid white background, full body, soft studio lighting, masterpiece, 8k resolution."
+    promptSnippet: "a friendly compact floating AI robot with a rounded ivory shell, cyan accent panels, two simple blue oval eyes on a dark face screen, two short articulated arms, and a small circular hover base; no human legs"
   }
 };
 
@@ -700,6 +693,72 @@ const MASCOT_ROLE_MAP = {
   "女性 Q版科普講師": "female_teacher",
   "可愛 AI 浮空機器人": "neutral_robot"
 };
+
+// One catalog powers all three selectors, the role cards and preview labels.
+const MASCOT_CATALOG = [
+  ["male_engineer", "👷", "工安工程師・男", "工安培訓 / 現場作業"],
+  ["female_engineer", "👷‍♀️", "工安工程師・女", "工安培訓 / 現場作業"],
+  ["male_manager", "👨‍💼", "商業顧問・男", "專案管理 / 商務提案"],
+  ["female_manager", "👩‍💼", "商業顧問・女", "專案管理 / 商務提案"],
+  ["male_teacher", "👨‍🏫", "科普講師・男", "教育訓練 / 知識解說"],
+  ["female_teacher", "👩‍🏫", "科普講師・女", "教育訓練 / 知識解說"],
+  ["neutral_robot", "🤖", "AI 機器人", "科技應用 / 數位轉型"],
+  ["researcher", "🧑‍🔬", "科學研究員", "研究成果 / 實驗解說", "a curious adult scientist with short dark hair, clear safety goggles, white lab coat over a lavender shirt, charcoal trousers, closed shoes, and one capped laboratory flask held upright"],
+  ["medical_educator", "🧑‍⚕️", "醫療衛教講師", "健康教育 / 照護培訓", "a reassuring adult healthcare educator with neatly tied dark hair, teal scrubs, white closed shoes, a navy stethoscope, and one closed cream-colored health education booklet"],
+  ["data_analyst", "🧑‍💻", "數據分析師", "數據報告 / 趨勢解析", "an attentive adult data analyst with short wavy dark hair, round glasses, navy cardigan over a cream shirt, charcoal trousers, white sneakers, and a tablet showing three simple teal bars without numbers"],
+  ["eco_advisor", "🌱", "永續顧問", "ESG 提案 / 環境教育", "an approachable adult sustainability advisor with short chestnut hair, sage-green field jacket, cream shirt, tan trousers, brown walking shoes, and one terracotta pot containing a two-leaf seedling"],
+  ["owl_guide", "🦉", "智慧貓頭鷹", "知識導讀 / 學習陪伴", "a wise small owl mascot with a round warm-brown feathered body, cream facial discs and belly, large amber eyes, round glasses, a small navy bow tie, two wings, two feet, and one closed teal book tucked under a wing"],
+  ["fox_guide", "🦊", "探險狐狸嚮導", "故事引導 / 流程探索", "a curious upright fox mascot with orange fur, cream muzzle and chest, dark-brown paws, pointed ears, one bushy white-tipped tail, a teal scarf, a small tan explorer backpack, and one folded map with abstract lines and no lettering"]
+].map(([key, icon, label, useCase, snippet]) => {
+  if (snippet) {
+    MASCOT_PRESETS[key] = {
+      name: label,
+      roleText: `${label}（${snippet}），全簡報維持相同外觀、服裝與配色`,
+      promptSnippet: snippet
+    };
+    MASCOT_ROLE_MAP[label] = key;
+  }
+  const value = Object.keys(MASCOT_ROLE_MAP).find(value => MASCOT_ROLE_MAP[value] === key);
+  return { key, icon, label, useCase, value };
+});
+
+function buildMascotImagePrompt(keyA, style, keyB = null) {
+  const a = MASCOT_PRESETS[keyA];
+  const b = MASCOT_PRESETS[keyB];
+  if (!a || (keyB && !b)) throw new Error("請選擇有效的角色");
+  const drawingStyle = MASCOT_STYLE_DETAILS[style] || MASCOT_STYLE_DETAILS["2.5D 3D Isometric 立體卡片去背風"];
+  const hasEngineer = [keyA, keyB].some(key => key === "male_engineer" || key === "female_engineer");
+  const characters = b
+    ? `Character A, left: ${a.promptSnippet}.\nCharacter B, right: ${b.promptSnippet}.`
+    : `Character: ${a.promptSnippet}.`;
+  const composition = b
+    ? "Landscape 3:2 composition. Exactly two characters, A on the left and B on the right, at matching visual scale. Leave a clear gap between their silhouettes; no overlap or shared accessories. Both face slightly toward the center while keeping their faces visible to the viewer."
+    : "Portrait 4:5 composition. Exactly one character centered in the image, front three-quarter view, looking toward the viewer. A relaxed welcoming pose with one free hand or wing gently open; the other holds the specified prop. For the robot, use a gentle greeting gesture and keep the hover base visible.";
+  const sameRole = keyA === keyB
+    ? "These are two instances of the same role: give A a small round teal badge and B a small round amber badge, both without lettering. Preserve the shared base outfit and keep these identity markers unchanged in later images."
+    : "Keep each character's specified outfit, colors, facial features and accessories separate; never transfer features between characters.";
+  return `TASK
+Create a polished presentation mascot reference image to reuse as a visual identity anchor. Produce one finished image with one pose per character, rather than a multi-panel character sheet.
+
+CHARACTER IDENTITY
+${characters}
+Use friendly, professional chibi proportions: approximately three heads tall for human characters, adult facial identity, expressive eyes and simplified readable shapes. Preserve the natural owl, fox or robot silhouette where applicable.
+
+DRAWING STYLE
+${drawingStyle.snippet}.
+
+COMPOSITION & POSE
+${composition} Show the entire body, including headwear, feet, wings, tail or hover base as applicable. Keep all props inside the frame, with at least 10% clear margin around the subjects. Props remain small and do not cover the face or torso.
+
+BACKGROUND & FINISH
+Pure white background, no environment, floor line, pedestal, border or decorative scenery. Keep edges clean for later background removal; any grounding shadow must be faint and compact. Use a calm, limited palette and clear contrast at thumbnail size.
+
+IDENTITY CONTINUITY
+${b ? sameRole : "Keep facial features, hairstyle, outfit, color palette, body proportions and signature prop fixed in future images; only change pose and expression."} If a character reference image is supplied, preserve its identity while applying the selected drawing style. For later slides, reuse this image as the reference and preserve each character's identity while changing pose and expression.
+
+AVOID
+Extra characters, duplicate faces, extra limbs, fused hands or wings, floating props, cropped extremities, unreadable accessory clutter, speech bubbles, captions, watermarks and text on books or screens.${hasEngineer ? " For the CPC helmet patch, reproduce the exact logo only when an official logo reference is supplied; otherwise leave the patch blank for later placement. Do not invent or approximate the lettering." : " No lettering or invented logos."}`;
+}
 
 function buildGlobalPptPrompt(mascotKey = "none", styleOption = "2.5D 3D Isometric 立體卡片去背風", styleKey = currentDesignStyleKey, dualKeyB = null) {
   const isDual = mascotKey !== "none" && dualKeyB && dualKeyB !== "none";
@@ -716,6 +775,9 @@ function buildGlobalPptPrompt(mascotKey = "none", styleOption = "2.5D 3D Isometr
   mascot_anchors:
     primary_host: "${mascotInfoA.name} (主講/主持人)"
     co_host: "${mascotInfoB.name} (解答/協同者)"
+    primary_appearance: "${mascotInfoA.promptSnippet}"
+    co_host_appearance: "${mascotInfoB.promptSnippet}"
+    continuity: "各頁維持兩位角色各自的臉部、服裝、配色與比例一致；不得遮擋標題、數據與圖表"
     style: "${styleOption}"
     auto_composition_logic:
       rule: "根據每頁內容主題自動在【左右對分構圖】與【主次輔助構圖】之間切換"
@@ -737,6 +799,8 @@ function buildGlobalPptPrompt(mascotKey = "none", styleOption = "2.5D 3D Isometr
     mascotDirectiveInSchema = `
   mascot_anchor:
     character_description: "${mascotInfoA.roleText}"
+    appearance: "${mascotInfoA.promptSnippet}"
+    continuity: "各頁維持角色臉部、服裝、配色與比例一致；不得遮擋標題、數據與圖表"
     style: "${styleOption}"
     rule: "每一頁簡報的視覺畫面中，必須出現該主角，並根據該頁主題展現適當的互動姿態"`;
 
@@ -813,7 +877,7 @@ const MASCOT_STYLE_DETAILS = {
     img: "images/female_engineer_isometric.png",
     tags: ["3D Isometric", "去背透卡", "科技現代"],
     desc: "💡 視覺特色：極具現代科技感的 3D 微縮幾何場景，角色與物件具備立體去背質感，視覺焦點清晰突出。",
-    snippet: "2.5D illustration style, 3D isometric, exquisite material details, soft lighting, clean solid white background",
+    snippet: "2.5D stylized illustration, isometric-inspired orthographic perspective with minimal foreshortening, rounded dimensional forms, restrained material detail, soft diffuse lighting and subtle ambient shading; avoid photorealism",
     color: "#a55eea"
   },
   "3D Q版柔光微縮模型風": {
@@ -821,7 +885,7 @@ const MASCOT_STYLE_DETAILS = {
     img: "images/male_manager_clay.png",
     tags: ["Q版盲盒", "柔光黏土", "親和療癒"],
     desc: "💡 視覺特色：圓潤可愛的盲盒公仔/黏土模型質感，帶有溫和攝影柔光與軟膠質感，極具親和力與視覺趣味感。",
-    snippet: "3D chibi style, soft clay model texture, miniature toy figure, studio soft lighting, cute figurine",
+    snippet: "3D chibi figurine with matte soft-clay texture, rounded sculpted forms, restrained surface detail, soft studio key light and gentle fill light; no glossy plastic, metallic skin or realistic pores",
     color: "#00d2d3"
   },
   "扁平簡約質感幾何風": {
@@ -829,7 +893,7 @@ const MASCOT_STYLE_DETAILS = {
     img: "images/neutral_robot_flat.png",
     tags: ["Flat Vector", "商務極簡", "專業俐落"],
     desc: "💡 視覺特色：乾淨優雅的極簡向量插畫，色塊清晰、線條精緻，適合嚴謹的商業簡報、顧問提案與數據報告。",
-    snippet: "Flat vector design, minimal geometric shapes, clean corporate style, elegant layout, modern flat illustration",
+    snippet: "Flat vector design, clean geometric silhouettes, solid color fills, consistent minimal outlines and a restrained corporate palette; no gradients, volumetric shading, 3D rendering, photographic lighting or texture",
     color: "#ff9f43"
   },
   "溫馨手繪水彩風格": {
@@ -837,7 +901,7 @@ const MASCOT_STYLE_DETAILS = {
     img: "images/male_engineer_watercolor.png",
     tags: ["Hand-drawn", "人文水彩", "溫暖故事"],
     desc: "💡 視覺特色：富有人文溫度的水彩渲染與手繪筆觸，色彩柔和自然，特別適合教育培訓、公益宣導與故事演講。",
-    snippet: "Warm watercolor texture, hand-drawn illustration, soft pastel color palette, storybook style, artistic",
+    snippet: "Warm watercolor texture contained within the character silhouette, hand-drawn contours, subtle pigment variation and a soft pastel palette; preserve readable facial features and clean outer edges, with no background washes, paint splashes, 3D rendering or glossy surfaces",
     color: "#2ecc71"
   }
 };
@@ -859,6 +923,38 @@ function initMascotFeature() {
   const tab1MascotImg = document.getElementById("tab1-mascot-img");
   const tab1MascotTitle = document.getElementById("tab1-mascot-title");
   const tab1MascotDesc = document.getElementById("tab1-mascot-desc");
+  let activeTarget = "a";
+  const roleCards = document.getElementById("mascot-role-cards");
+  [tab1MascotRole, tab1MascotRoleA, tab1MascotRoleB].forEach(select => {
+    const previousValue = select.value;
+    select.replaceChildren(...MASCOT_CATALOG.map(role => {
+      const option = document.createElement("option");
+      option.value = role.value;
+      option.textContent = `${role.icon} ${role.label}`;
+      return option;
+    }));
+    select.value = previousValue;
+  });
+  MASCOT_CATALOG.forEach(role => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "mascot-role-card";
+    card.dataset.key = role.key;
+    card.innerHTML = `<span class="mascot-role-icon" aria-hidden="true">${role.icon}</span><strong>${role.label}</strong><small>${role.useCase}</small><span class="mascot-card-check" aria-hidden="true">✓</span>`;
+    card.addEventListener("click", () => {
+      const select = tab1MascotMode.value === "dual"
+        ? (activeTarget === "a" ? tab1MascotRoleA : tab1MascotRoleB) : tab1MascotRole;
+      select.value = role.value;
+      updateTab1Prompt();
+    });
+    roleCards.appendChild(card);
+  });
+  document.querySelectorAll("[data-target]").forEach(button => {
+    button.addEventListener("click", () => {
+      activeTarget = button.dataset.target;
+      updateTab1Prompt();
+    });
+  });
 
   window.updateTab1Prompt = function() {
     if (!pptTemplateText) return;
@@ -886,7 +982,7 @@ function initMascotFeature() {
 
       if (tab1MascotImg && styleDetails) tab1MascotImg.src = styleDetails.img;
       if (tab1MascotTitle && mascotDetails) tab1MascotTitle.textContent = `👤 單主角：${mascotDetails.name}`;
-      if (tab1MascotDesc) tab1MascotDesc.textContent = "已將該主角動作與姿態規範注入全域提示詞中！系統將自動在每頁投影片安排該主角對應主題之動作與場景互動。";
+      if (tab1MascotDesc) tab1MascotDesc.textContent = "提示詞已加入每頁角色引導：封面招呼、數據指引、流程互動與結尾致謝，並要求維持相同外觀。";
 
       pptTemplateText.textContent = buildGlobalPptPrompt(mascotKey, styleVal, currentDesignStyleKey);
     } else if (mode === "dual") {
@@ -910,6 +1006,26 @@ function initMascotFeature() {
 
       pptTemplateText.textContent = buildGlobalPptPrompt(keyA, styleVal, currentDesignStyleKey, keyB);
     }
+    document.getElementById("mascot-library").hidden = mode === "none";
+    document.getElementById("mascot-targets").hidden = mode !== "dual";
+    const selectedValues = mode === "dual" ? [tab1MascotRoleA.value, tab1MascotRoleB.value] : [tab1MascotRole.value];
+    const selectedRoles = selectedValues.map(value => MASCOT_CATALOG.find(role => role.value === value));
+    const activeRole = selectedRoles[mode === "dual" && activeTarget === "b" ? 1 : 0];
+    roleCards.querySelectorAll("button").forEach(card => {
+      const selected = card.dataset.key === activeRole.key;
+      card.setAttribute("aria-pressed", String(selected));
+    });
+    document.querySelectorAll("[data-target]").forEach(button => {
+      button.setAttribute("aria-pressed", String(button.dataset.target === activeTarget));
+    });
+    document.getElementById("mascot-cast").innerHTML = selectedRoles.map((role, index) =>
+      `<div class="mascot-cast-person"><span aria-hidden="true">${role.icon}</span><small>${mode === "dual" ? `主角 ${index ? "B" : "A"}` : "主角"} · ${role.label}</small></div>`
+    ).join("");
+    document.getElementById("mascot-style-label").textContent = styleVal;
+    tab1MascotImg.alt = `${styleVal}參考圖，非所選角色成品`;
+    document.getElementById("mascot-selection-note").textContent = mode === "dual" && selectedValues[0] === selectedValues[1]
+      ? "兩位主角目前相同；建議選擇不同角色，讓主持與協作更容易辨識。"
+      : "角色圖示供選角辨識；右側圖片僅示意畫風。複製提示詞後即可生成角色參考圖。";
   };
 
   if (tab1MascotMode) tab1MascotMode.addEventListener("change", updateTab1Prompt);
@@ -934,13 +1050,13 @@ function initMascotFeature() {
         const keyB = MASCOT_ROLE_MAP[roleB_Title] || "female_manager";
         const mascotA = MASCOT_PRESETS[keyA];
         const mascotB = MASCOT_PRESETS[keyB];
-        textToCopy = `Dual character design: ${mascotA.promptSnippet} and ${mascotB.promptSnippet}, standing side-by-side discussing presentation charts, ${styleDetails.snippet}`;
+        textToCopy = buildMascotImagePrompt(keyA, styleVal, keyB);
       } else {
         const roleVal = tab1MascotRole ? tab1MascotRole.value : "男性 Q版工程師";
         const mascotKey = MASCOT_ROLE_MAP[roleVal] || "male_engineer";
         const mascotDetails = MASCOT_PRESETS[mascotKey];
         if (mascotDetails && styleDetails) {
-          textToCopy = mascotDetails.prompt;
+          textToCopy = buildMascotImagePrompt(mascotKey, styleVal);
         }
       }
 
@@ -952,7 +1068,7 @@ function initMascotFeature() {
             if (btnText) btnText.textContent = "✓ 已複製生圖 Prompt！";
             setTimeout(() => {
               tab1CopyMascotPromptBtn.classList.remove("success");
-              if (btnText) btnText.textContent = "📋 複製生圖 Prompt";
+              if (btnText) btnText.textContent = "📋 複製角色生圖提示詞";
             }, 2000);
           })
           .catch(err => alert("複製失敗，請手動複製"));
