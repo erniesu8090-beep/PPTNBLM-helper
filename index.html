@@ -13,8 +13,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
   <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="studio.css">
 </head>
 <body>
+  <a class="skip-link" href="#presentation-helper-workspace">跳至工作區</a>
   <div class="stars-bg"></div>
   <div class="container">
     
@@ -50,24 +52,36 @@
           <p>SLIDE & NARRATIVE PROMPT CONSOLE</p>
         </div>
       </div>
-      <div class="header-tagline">
-        <h2 id="header-title">突破簡報 15 頁的生成限制</h2>
-        <p id="header-desc">自動分組規劃與首尾銜接，無損合併完美長簡報</p>
-      </div>
       <div class="status-badge">
         <span class="status-dot"></span>
-        <span>SLIDE EDITION v3.0.0 (2026/08/03)</span>
+        <span>本機提示詞工作台</span>
       </div>
     </header>
 
+    <section class="studio-hero" aria-labelledby="hero-title">
+      <img class="hero-art" src="images/studio-hero.webp" alt="玻璃簡報卡片與金色聲波雕塑組成的深色創作工作台" width="1536" height="1024" fetchpriority="high">
+      <div class="hero-copy">
+        <span class="eyebrow">YOUR IDEAS. BEAUTIFULLY STRUCTURED.</span>
+        <h2 id="hero-title">把想法，編排成<br><em>精彩簡報。</em></h2>
+        <p>為 NotebookLM 打造的創作工作台。<br>統一視覺、規劃長簡報，讓每一頁都有好故事。</p>
+        <a class="hero-cta" href="#presentation-helper-workspace" data-jump="presentation">開始規劃 <span aria-hidden="true">↗</span></a>
+        <span class="hero-note">無需登入 · 免安裝 · 提示詞即時產生</span>
+      </div>
+      <span class="hero-caption">CAST. / SLIDE & NARRATIVE STUDIO</span>
+    </section>
+    <div class="workflow-strip" aria-label="製作流程">
+      <a href="#presentation-helper-workspace" data-jump="presentation"><span>01</span><div><strong>設定視覺與角色</strong><small>選擇風格，建立一致的設計語言</small></div><b aria-hidden="true">↗</b></a>
+      <a href="#yaml-splitter" data-jump="presentation"><span>02</span><div><strong>規劃與分段生成</strong><small>複製提示詞，再貼回 YAML 切割</small></div><b aria-hidden="true">↗</b></a>
+      <a href="#slide-narrative-workspace" data-jump="narrative"><span>03</span><div><strong>寫出自然的講解口白</strong><small>單人講述或雙人對談，自由切換</small></div><b aria-hidden="true">↗</b></a>
+    </div>
     <!-- TAB NAVIGATION -->
-    <nav class="tab-navigation">
-      <div class="tab-group-border">
-        <button class="tab-btn active" data-tab="presentation-helper">
+    <nav class="tab-navigation" aria-label="創作工具">
+      <div class="tab-group-border" role="tablist" aria-label="工作區">
+        <button id="tab-presentation" role="tab" aria-selected="true" aria-controls="presentation-helper-workspace" class="tab-btn active" data-tab="presentation-helper">
           <span class="tab-icon">📊</span>
-          <span class="tab-text">簡報 15頁限制突破</span>
+          <span class="tab-text">簡報規劃與切割</span>
         </button>
-        <button class="tab-btn" data-tab="slide-narrative">
+        <button id="tab-narrative" role="tab" aria-selected="false" aria-controls="slide-narrative-workspace" tabindex="-1" class="tab-btn" data-tab="slide-narrative">
           <span class="tab-icon">🗣️</span>
           <span class="tab-text">簡報講解口白</span>
         </button>
@@ -77,7 +91,7 @@
     <!-- WORKSPACE TABS CONTENT -->
     
     <!-- TAB 1: PRESENTATION HELPER WORKSPACE -->
-    <div id="presentation-helper-workspace" class="workspace-tab-content active">
+    <div id="presentation-helper-workspace" role="tabpanel" aria-labelledby="tab-presentation" tabindex="-1" class="workspace-tab-content active">
       <div class="card card-ppt-prompt" style="margin-bottom: 24px;">
           <div class="card-num">01</div>
           <div class="card-header-flex">
@@ -85,16 +99,16 @@
               <h3>NBLM 全域簡報規劃提示詞</h3>
               <p>複製下方提示詞貼入 NotebookLM 對話框，進行全域簡報架構與內容規劃</p>
             </div>
-            <button id="toggle-ppt-prompt-btn" class="toggle-collapse-btn">
+            <button id="toggle-ppt-prompt-btn" class="toggle-collapse-btn collapsed" aria-expanded="false" aria-controls="ppt-preview">
               <span class="toggle-icon">▲</span>
-              <span class="toggle-text">收折提示詞</span>
+              <span class="toggle-text">展開提示詞</span>
             </button>
           </div>
 
           <!-- Design Style Selector Component -->
-          <div style="margin-bottom: 20px; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(247, 37, 133, 0.3); border-radius: 12px; padding: 16px;">
+          <div class="settings-section" style="margin-bottom: 20px; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(247, 37, 133, 0.3); border-radius: 12px; padding: 16px;">
             <div style="font-size: 13px; font-weight: 600; color: #f72585; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
-              <span style="display: flex; align-items: center; gap: 6px;">🎨 簡報視覺設計風格庫 (Presentation Design Style Gallery)</span>
+              <span style="display: flex; align-items: center; gap: 6px;">視覺風格</span>
               <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">點選膠囊標籤一鍵注入設計 DNA</span>
             </div>
 
@@ -110,9 +124,9 @@
           </div>
 
           <!-- Combined Mascot Continuity Injector Section -->
-          <div style="margin-bottom: 20px; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(165, 94, 234, 0.3); border-radius: 12px; padding: 16px;">
+          <div class="settings-section" style="margin-bottom: 20px; background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(165, 94, 234, 0.3); border-radius: 12px; padding: 16px;">
             <div style="font-size: 13px; font-weight: 600; color: #a55eea; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
-              <span style="display: flex; align-items: center; gap: 6px;">🎭 吉祥物貫穿與雙主角對談模式 (Mascot Continuity Control)</span>
+              <span style="display: flex; align-items: center; gap: 6px;">角色與吉祥物</span>
               <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">選取主角將其動作與姿勢規範自動寫入全域提示詞</span>
             </div>
 
@@ -198,7 +212,7 @@
             </div>
           </div>
 
-          <div class="prompt-preview-box">
+          <div id="ppt-preview" class="prompt-preview-box collapsed" style="display: none;">
             <pre id="ppt-template-text" class="prompt-text">載入全域簡報規劃提示詞中...</pre>
           </div>
           
@@ -206,18 +220,18 @@
             <button id="copy-ppt-btn" class="action-btn copy-btn">
               <span class="btn-text">📋 複製全域規劃提示詞</span>
             </button>
-            <a href="https://notebooklm.google.com/" target="_blank" class="action-btn link-btn">
+            <a href="https://notebooklm.google.com/" target="_blank" rel="noopener noreferrer" class="action-btn link-btn">
               <span>🚀 開啟 NotebookLM</span>
             </a>
           </div>
         </div>
 
       <!-- Card 2: YAML Splitter -->
-      <div class="card card-yaml-splitter">
+      <div id="yaml-splitter" class="card card-yaml-splitter">
         <div class="card-num" style="background: linear-gradient(135deg, #a55eea, #c8d6e5); box-shadow: 0 0 10px rgba(165, 94, 234, 0.4);">02</div>
         <div class="card-header-text">
-          <h3>簡報 YAML 智慧切割器 (YAML Splitter)</h3>
-          <p>將 NotebookLM 一口氣產出的全域 YAML 貼在下方，自動為您處理 10/12 頁上限並生成分段 Parts</p>
+          <h3>YAML 分段工作台</h3>
+          <p>將 NotebookLM 一口氣產出的全域 YAML 貼在下方，自動為您依您選擇的 10/12 頁分組。後續分組含 2 頁參考頁，合併簡報時請刪除重複的錨點與緩衝頁</p>
         </div>
         
         <div class="splitter-workspace">
@@ -245,7 +259,7 @@
           
           <div class="splitter-output-area">
             <label>分段切割結果：</label>
-            <div id="yaml-split-results" class="split-results-placeholder">
+            <div id="yaml-split-results" role="status" aria-live="polite" class="split-results-placeholder">
               等待輸入 YAML 並點擊開始切割...
             </div>
           </div>
@@ -254,7 +268,7 @@
     </div>
 
     <!-- TAB 2: SLIDE NARRATIVE WORKSPACE -->
-    <div id="slide-narrative-workspace" class="workspace-tab-content">
+    <div id="slide-narrative-workspace" role="tabpanel" aria-labelledby="tab-narrative" tabindex="-1" hidden class="workspace-tab-content">
       <div class="main-grid">
         
         <!-- LEFT PANEL: PARAMETERS -->
@@ -542,7 +556,7 @@
               <button id="copy-narrative-btn" class="action-btn copy-btn copy-btn-gold">
                 <span class="btn-text">📋 複製簡報口白指令</span>
               </button>
-              <a href="https://notebooklm.google.com/" target="_blank" class="action-btn link-btn">
+              <a href="https://notebooklm.google.com/" target="_blank" rel="noopener noreferrer" class="action-btn link-btn">
                 <span>🚀 開啟 NotebookLM</span>
               </a>
             </div>
@@ -561,6 +575,7 @@
   </div>
 
   <!-- JavaScript -->
+  <script src="yaml-splitter.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

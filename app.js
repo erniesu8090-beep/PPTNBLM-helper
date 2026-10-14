@@ -1,3 +1,25 @@
+// Shared clipboard support, including direct file:// usage.
+async function copyText(text) {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+  } catch (_) { /* Fall back when clipboard permission is unavailable. */ }
+  const previous = document.activeElement;
+  const field = document.createElement("textarea");
+  field.value = text;
+  field.style.cssText = "position:fixed;left:-9999px;top:0";
+  document.body.appendChild(field);
+  field.select();
+  try {
+    if (!document.execCommand("copy")) throw new Error("無法存取剪貼簿");
+  } finally {
+    field.remove();
+    previous?.focus({ preventScroll: true });
+  }
+}
+
 /* ==========================================================================
    CAST. Studio - SLIDE & NARRATIVE EDITION ENGINE
    ========================================================================== */
@@ -14,46 +36,47 @@ function init() {
       // Update active tab button style
       tabButtons.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
+      tabButtons.forEach(b => { b.setAttribute("aria-selected", String(b === btn)); b.tabIndex = b === btn ? 0 : -1; });
 
       // Show target workspace tab content
       workspaces.forEach(ws => {
         if (ws.id === `${targetTab}-workspace`) {
           ws.classList.add("active");
+          ws.hidden = false;
         } else {
           ws.classList.remove("active");
+          ws.hidden = true;
         }
       });
 
-      // Update header tagline text and theme based on active tab
-      const headerTitle = document.getElementById("header-title");
-      const headerDesc = document.getElementById("header-desc");
       const headerElement = document.querySelector(".header");
 
-      if (headerTitle && headerDesc) {
-        if (targetTab === "presentation-helper") {
-          headerTitle.textContent = "突破簡報 15 頁的生成限制";
-          headerDesc.textContent = "自動分組規劃與首尾銜接，無損合併完美長簡報";
-        } else if (targetTab === "slide-narrative") {
-          headerTitle.textContent = "為簡報投影片調配口白與腳本";
-          headerDesc.textContent = "設定角色人設與口說調性，一鍵生成高品質投影片講解口白提示詞";
-        } else if (targetTab === "mascot-guide") {
-          headerTitle.textContent = "簡報吉祥物視覺貫穿 (Mascot Continuity)";
-          headerDesc.textContent = "統一角色生圖規範，讓投影片每一頁都擁有連貫且生動的故事引導主角";
-        }
-      }
-
       if (headerElement) {
-        headerElement.classList.remove("theme-ppt", "theme-narrative", "theme-mascot");
+        headerElement.classList.remove("theme-ppt", "theme-narrative");
         if (targetTab === "presentation-helper") {
           headerElement.classList.add("theme-ppt");
         } else if (targetTab === "slide-narrative") {
           headerElement.classList.add("theme-narrative");
-        } else if (targetTab === "mascot-guide") {
-          headerElement.classList.add("theme-mascot");
+
         }
       }
     });
   });
+
+  document.querySelector(".tab-navigation").addEventListener("keydown", event => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const buttons = [...tabButtons];
+    const current = buttons.indexOf(document.activeElement);
+    const index = event.key === "Home" ? 0 : event.key === "End" ? buttons.length - 1 :
+      (current + (event.key === "ArrowRight" ? 1 : -1) + buttons.length) % buttons.length;
+    buttons[index].click();
+    buttons[index].focus();
+  });
+  document.querySelectorAll("[data-jump]").forEach(link => link.addEventListener("click", () => {
+    const tab = link.dataset.jump === "narrative" ? "slide-narrative" : "presentation-helper";
+    document.querySelector(`[data-tab="${tab}"]`).click();
+  }));
 
   // Copy PPT Template to Clipboard
   const copyPptBtn = document.getElementById("copy-ppt-btn");
@@ -63,7 +86,7 @@ function init() {
     copyPptBtn.addEventListener("click", () => {
       const textToCopy = pptTemplateText.textContent;
       
-      navigator.clipboard.writeText(textToCopy)
+      copyText(textToCopy)
         .then(() => {
           copyPptBtn.classList.add("success");
           const origText = copyPptBtn.querySelector(".btn-text").textContent;
@@ -92,6 +115,7 @@ function init() {
       
       // Guaranteed inline display toggle for absolute collapse
       pptPromptBox.style.display = isCollapsed ? "none" : "block";
+      togglePptPromptBtn.setAttribute("aria-expanded", String(!isCollapsed));
       
       const icon = togglePptPromptBtn.querySelector(".toggle-icon");
       const text = togglePptPromptBtn.querySelector(".toggle-text");
@@ -115,15 +139,17 @@ function init() {
     pptSplitBtn.addEventListener("click", () => {
       const rawYaml = pptYamlInput.value.trim();
       if (!rawYaml) {
-        yamlSplitResults.innerHTML = `<span style="color: var(--status-red);">❌ 請先貼入 YAML 內容再進行切割！</span>`;
+        yamlSplitResults.className = "split-results-placeholder error-message";
+        yamlSplitResults.textContent = "請先貼入 YAML 內容再進行切割。";
         return;
       }
 
       try {
-        const parts = splitYaml(rawYaml);
+        const parts = CastYaml.splitYaml(rawYaml, Number(document.getElementById("ppt-split-limit").value));
         renderSplitParts(parts);
       } catch (err) {
-        yamlSplitResults.innerHTML = `<span style="color: var(--status-red);">❌ 解析錯誤：${err.message}</span>`;
+        yamlSplitResults.className = "split-results-placeholder error-message";
+        yamlSplitResults.textContent = `解析錯誤：${err.message}`;
       }
     });
   }
@@ -134,143 +160,6 @@ function init() {
       yamlSplitResults.innerHTML = "等待輸入 YAML 並點擊開始切割...";
       yamlSplitResults.className = "split-results-placeholder";
     });
-  }
-
-  function splitYaml(yamlString) {
-    const lines = yamlString.split(/\r?\n/);
-    
-    let globalSpecStart = -1;
-    let slidePlanningStart = -1;
-    
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (line.startsWith("global_design_specification:")) {
-        globalSpecStart = i;
-      }
-      if (line.startsWith("slide_planning:")) {
-        slidePlanningStart = i;
-        break;
-      }
-    }
-    
-    if (slidePlanningStart === -1) {
-      throw new Error("找不到 `slide_planning:` 欄位，請確認 YAML 格式是否正確。");
-    }
-    
-    const globalSpecLines = lines.slice(Math.max(0, globalSpecStart), slidePlanningStart);
-    
-    const pageBlocks = [];
-    let currentPageLines = [];
-    let currentPageNum = -1;
-    
-    for (let i = slidePlanningStart + 1; i < lines.length; i++) {
-      const line = lines[i];
-      const pageMatch = line.match(/^(\s*)-\s*page:\s*(\d+)/) || line.match(/^(\s*)page:\s*(\d+)/);
-      
-      if (pageMatch) {
-        if (currentPageLines.length > 0) {
-          pageBlocks.push({ num: currentPageNum, lines: currentPageLines });
-        }
-        currentPageNum = parseInt(pageMatch[2], 10);
-        currentPageLines = [line];
-      } else {
-        if (currentPageNum !== -1) {
-          currentPageLines.push(line);
-        }
-      }
-    }
-    
-    if (currentPageLines.length > 0) {
-      pageBlocks.push({ num: currentPageNum, lines: currentPageLines });
-    }
-    
-    if (pageBlocks.length === 0) {
-      throw new Error("找不到任何投影片頁面資訊（`- page: [數字]`），請確認 YAML 格式。");
-    }
-    
-    const pptSplitLimitEl = document.getElementById("ppt-split-limit");
-    const limit = pptSplitLimitEl ? parseInt(pptSplitLimitEl.value, 10) : 10;
-    
-    const parts = [];
-    const totalPages = pageBlocks.length;
-    
-    // Part 1: First `limit` pages (index 0 to limit-1)
-    const part1Pages = pageBlocks.slice(0, Math.min(limit, totalPages));
-    const isPart1Last = totalPages <= limit;
-    parts.push({
-      partNum: 1,
-      pageRange: `第 1 - ${part1Pages[part1Pages.length - 1].num} 頁`,
-      yaml: assemblePartYaml(globalSpecLines, part1Pages, isPart1Last, 1)
-    });
-    
-    // Subsequent parts: (limit - 2) pages per part, plus style anchor (page 1) and buffer (prev part's last page)
-    const newPagesPerPart = limit - 2;
-    let currentIndex = limit;
-    let partCounter = 2;
-    while (currentIndex < totalPages) {
-      const partPages = [];
-      // Style anchor
-      partPages.push(pageBlocks[0]);
-      // Buffer zone (previous part's last page)
-      partPages.push(pageBlocks[currentIndex - 1]);
-      
-      // New pages
-      const newPages = pageBlocks.slice(currentIndex, Math.min(currentIndex + newPagesPerPart, totalPages));
-      partPages.push(...newPages);
-      
-      const startPageNum = newPages[0].num;
-      const endPageNum = newPages[newPages.length - 1].num;
-      
-      const isThisPartLast = (currentIndex + newPagesPerPart) >= totalPages;
-      
-      parts.push({
-        partNum: partCounter,
-        pageRange: `第 1, ${pageBlocks[currentIndex - 1].num}, ${startPageNum} - ${endPageNum} 頁`,
-        yaml: assemblePartYaml(globalSpecLines, partPages, isThisPartLast, partCounter)
-      });
-      
-      currentIndex += newPagesPerPart;
-      partCounter++;
-    }
-    
-    return parts;
-  }
-
-  function assemblePartYaml(globalLines, pages, isLastPart, partNum) {
-    let output = "";
-    if (globalLines.length > 0) {
-      output += globalLines.join("\n") + "\n";
-    } else {
-      output += "global_design_specification:\n  # 全域設計規範已省略\n";
-    }
-    output += "slide_planning:\n";
-    
-    pages.forEach((p, idx) => {
-      let linesToUse = p.lines;
-      if (idx === 0 && partNum > 1) {
-        linesToUse = [...p.lines];
-        for (let i = 0; i < linesToUse.length; i++) {
-          const line = linesToUse[i];
-          const match = line.match(/^(\s*title:\s*)(["']?)(.*?)\2\s*$/);
-          if (match) {
-            const prefix = match[1];
-            const quote = match[2] || '"';
-            const titleText = match[3];
-            linesToUse[i] = `${prefix}${quote}[Part ${partNum}] ${titleText}${quote}`;
-            break;
-          }
-        }
-      }
-      output += linesToUse.join("\n") + "\n";
-    });
-    
-    if (isLastPart) {
-      output += "\n# 🎉 提示：所有簡報內容已全數規劃完畢！\n";
-    } else {
-      output += "\n# ⚠️ 提示：簡報尚未完全規劃完畢，請繼續複製並生成下一組分段 (Part)。\n";
-    }
-    
-    return output;
   }
 
   function renderSplitParts(parts) {
@@ -300,13 +189,14 @@ function init() {
       const textarea = document.createElement("textarea");
       textarea.className = "split-part-textarea";
       textarea.readOnly = true;
+      textarea.setAttribute("aria-label", `Part ${part.partNum} YAML`);
       textarea.value = part.yaml;
       
       partCard.appendChild(header);
       partCard.appendChild(textarea);
       
       copyBtn.addEventListener("click", () => {
-        navigator.clipboard.writeText(part.yaml)
+        copyText(part.yaml)
           .then(() => {
             const origText = copyBtn.innerHTML;
             copyBtn.innerHTML = `<span>✓ 已複製！</span>`;
@@ -375,7 +265,7 @@ function init() {
   narrativeInputs.forEach(input => {
     if (input) {
       input.addEventListener("input", updateNarrativePrompt);
-      input.addEventListener("change", updateNarrativePrompt);
+
     }
   });
 
@@ -548,7 +438,7 @@ function init() {
   if (copyNarrativeBtn && narrativePromptOutput) {
     copyNarrativeBtn.addEventListener("click", () => {
       const textToCopy = narrativePromptOutput.textContent;
-      navigator.clipboard.writeText(textToCopy)
+      copyText(textToCopy)
         .then(() => {
           copyNarrativeBtn.classList.add("success");
           const origText = copyNarrativeBtn.querySelector(".btn-text").textContent;
@@ -894,7 +784,7 @@ function buildGlobalPptPrompt(mascotKey = "none", styleOption = "2.5D 3D Isometr
 - 生成的簡報內容不要有字體的名字。
 
 【YAML 輸出標準格式 (Output Schema)】
-所有輸出內容必須嚴格遵守以下 YAML 架構（不可包含任何非 YAML 的 markdown 說明文字），請務必維持欄位的精簡（特別是描述與指令的長度），以防貼入簡報系統時字數超限：
+所有輸出內容必須嚴格遵守以下 YAML 架構（不可包含任何非 YAML 的 markdown 說明文字），保持描述清楚，避免重複敘述；generation_prompt 依下方要求提供足夠內容與排版細節：
 
 ${globalSpecSection}
 
@@ -914,7 +804,7 @@ slide_planning:
 【編寫規範 (Rules)】
 - 所有字串值必須包裹在雙引號 "" 內。
 - 層級縮排必須準確（2 個空格）。
-- 若來源資訊不足，請根據專業設計邏輯進行「合理推斷」並填入 YAML 中，而非留白。`;
+- 若來源資訊不足，請標示「來源未提供」或列出待確認事項；不可捏造數據、引用或事實。版面與配色可以依設計邏輯推導。`;
 }
 
 const MASCOT_STYLE_DETAILS = {
@@ -973,6 +863,7 @@ function initMascotFeature() {
   window.updateTab1Prompt = function() {
     if (!pptTemplateText) return;
     const mode = tab1MascotMode ? tab1MascotMode.value : "none";
+    document.getElementById("tab1-mascot-style-col").hidden = mode === "none";
     const styleVal = tab1MascotStyle ? tab1MascotStyle.value : "2.5D 3D Isometric 立體卡片去背風";
     const styleDetails = MASCOT_STYLE_DETAILS[styleVal] || MASCOT_STYLE_DETAILS["2.5D 3D Isometric 立體卡片去背風"];
 
@@ -1054,7 +945,7 @@ function initMascotFeature() {
       }
 
       if (textToCopy) {
-        navigator.clipboard.writeText(textToCopy)
+        copyText(textToCopy)
           .then(() => {
             tab1CopyMascotPromptBtn.classList.add("success");
             const btnText = tab1CopyMascotPromptBtn.querySelector(".btn-text");
@@ -1464,26 +1355,24 @@ function initDesignStyleGallery() {
       const style = DESIGN_STYLES[key];
       const isActive = (key === currentDesignStyleKey);
       return `
-        <button class="style-chip-btn ${isActive ? 'active' : ''}" data-style="${key}">
+        <button class="style-chip-btn ${isActive ? 'active' : ''}" data-style="${key}" aria-pressed="${isActive}">
           <span>${style.icon}</span>
           <span>${style.name}</span>
         </button>
       `;
     }).join("");
 
-    const chipBtns = chipsContainer.querySelectorAll(".style-chip-btn");
-    chipBtns.forEach(btn => {
-      btn.addEventListener("click", () => {
-        const key = btn.getAttribute("data-style");
-        selectDesignStyle(key);
-      });
-    });
+
   }
 
   function selectDesignStyle(key) {
     if (!DESIGN_STYLES[key]) return;
     currentDesignStyleKey = key;
-    renderChips();
+    chipsContainer.querySelectorAll(".style-chip-btn").forEach(button => {
+      const active = button.dataset.style === key;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
     renderActiveCard(key);
 
     if (typeof window.updateTab1Prompt === "function") {
@@ -1492,7 +1381,7 @@ function initDesignStyleGallery() {
 
     if (pptTemplateText) {
       pptTemplateText.style.transition = "box-shadow 0.3s ease";
-      pptTemplateText.style.boxShadow = "0 0 24px rgba(247, 37, 133, 0.75)";
+      pptTemplateText.style.boxShadow = "0 0 0 1px rgba(162, 202, 177, 0.4)";
       setTimeout(() => {
         pptTemplateText.style.boxShadow = "";
       }, 1500);
@@ -1549,6 +1438,10 @@ function initDesignStyleGallery() {
     `;
   }
 
+  chipsContainer.addEventListener("click", event => {
+    const button = event.target.closest("[data-style]");
+    if (button) selectDesignStyle(button.dataset.style);
+  });
   // Initial render
   renderChips();
   renderActiveCard(currentDesignStyleKey);
